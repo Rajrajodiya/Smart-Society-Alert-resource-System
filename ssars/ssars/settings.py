@@ -130,4 +130,4 @@ MEDIA_ROOT=os.path.join(BASE_DIR,'media')
 MEDIA_URL='/media/'
 
 # OpenWeatherMap API Configuration
-OPENWEATHER_API_KEY = '142efcb0d508709356d0dcfb8dbb9d53'
+OPENWEATHER_API_KEY = ''
