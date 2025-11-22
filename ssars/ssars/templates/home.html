@@ -1,0 +1,149 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <div class="bg-gradient-primary-to-secondary p-5 rounded-4 mb-4 shadow-sm text-white" style="background: linear-gradient(90deg, #007bff 0%, #00c6ff 100%);">
+            <h1 class="display-5 fw-bold mb-2"><i class="bi bi-shield-check"></i> Welcome to SSARS</h1>
+            <p class="lead mb-2">Smart Society Alert & Resource System</p>
+            <hr class="border-light">
+            <p>Your comprehensive platform for <span class="fw-bold">community alerts</span>, <span class="fw-bold">weather monitoring</span>, and <span class="fw-bold">resource management</span>.</p>
+        </div>
+    </div>
+</div>
+
+<!-- Current Weather Dashboard -->
+{% if current_weather %}
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card border-0 shadow-lg rounded-4">
+            <div class="card-header bg-success text-white rounded-top-4">
+                <h5 class="mb-0"><i class="bi bi-geo-alt"></i> Current Weather - {{ current_weather.city }}, {{ current_weather.country }}</h5>
+            </div>
+            <div class="card-body">
+                <div class="row align-items-center">
+                    <div class="col-md-3 text-center">
+                        <div class="display-4 fw-bold text-primary">{{ current_weather.temp|floatformat:1 }}°C</div>
+                        <p class="text-muted mb-0">Feels like {{ current_weather.feels_like|floatformat:1 }}°C</p>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="row text-center">
+                            <div class="col-6">
+                                <div class="h5 text-info mb-0">{{ current_weather.humidity }}%</div>
+                                <small class="text-muted">Humidity</small>
+                            </div>
+                            <div class="col-6">
+                                <div class="h5 text-warning mb-0">{{ current_weather.pressure }} hPa</div>
+                                <small class="text-muted">Pressure</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="row text-center">
+                            <div class="col-6">
+                                <div class="h5 text-secondary mb-0">{{ current_weather.wind_speed|floatformat:1 }} m/s</div>
+                                <small class="text-muted">Wind Speed</small>
+                            </div>
+                            <div class="col-6">
+                                <div class="h5 text-info mb-0">{{ current_weather.visibility|floatformat:1 }} km</div>
+                                <small class="text-muted">Visibility</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3 text-center">
+                        <div class="h6 text-capitalize mb-1">{{ current_weather.weather_description }}</div>
+                        <p class="text-muted small mb-0">{{ current_weather.dt|date:"M d, Y H:i" }}</p>
+                        <a href="{% url 'weather' %}?city={{ current_weather.city }}" class="btn btn-outline-primary btn-sm mt-2">View Details</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<div class="row g-4">
+    <div class="col-md-6">
+        <div class="card border-0 shadow-lg rounded-4 h-100">
+            <div class="card-header bg-primary text-white rounded-top-4">
+                <h5 class="mb-0"><i class="bi bi-newspaper"></i> Latest News</h5>
+            </div>
+            <div class="card-body">
+                {% if latest_news %}
+                    {% for news in latest_news %}
+                        <div class="mb-4 pb-2 border-bottom">
+                            <h6 class="fw-bold mb-1">{{ news.title }}</h6>
+                            <p class="text-muted small mb-1"><i class="bi bi-calendar-event"></i> {{ news.date|date:"M d, Y" }}</p>
+                            <p class="mb-1">{{ news.description|truncatewords:20 }}</p>
+                        </div>
+                    {% endfor %}
+                    <a href="{% url 'news' %}" class="btn btn-outline-primary btn-sm mt-2"><i class="bi bi-arrow-right-circle"></i> View All News</a>
+                {% else %}
+                    <p class="text-muted">No news available.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card border-0 shadow-lg rounded-4 h-100">
+            <div class="card-header bg-info text-white rounded-top-4">
+                <h5 class="mb-0"><i class="bi bi-cloud-sun"></i> Latest Weather</h5>
+            </div>
+            <div class="card-body">
+                {% if latest_weather %}
+                    {% for weather in latest_weather %}
+                        <div class="mb-4 pb-2 border-bottom">
+                            <h6 class="fw-bold mb-1">{{ weather.city }}</h6>
+                            <p class="text-muted small mb-1"><i class="bi bi-clock"></i> {{ weather.dt_txt|date:"M d, Y H:i" }}</p>
+                            <p class="mb-1">
+                                <span class="badge bg-primary">Temp: {{ weather.temp|floatformat:1 }}°C</span>
+                                <span class="badge bg-info text-dark">Humidity: {{ weather.humidity|floatformat:1 }}%</span>
+                            </p>
+                        </div>
+                    {% endfor %}
+                    <a href="{% url 'weather' %}" class="btn btn-outline-info btn-sm mt-2"><i class="bi bi-arrow-right-circle"></i> View Weather Data</a>
+                {% else %}
+                    <p class="text-muted">No weather data available.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="card border-0 shadow-lg rounded-4">
+            <div class="card-header bg-gradient rounded-top-4" style="background: linear-gradient(90deg, #007bff 0%, #00c6ff 100%);">
+                <h5 class="mb-0 text-white"><i class="bi bi-bar-chart-line"></i> Quick Statistics</h5>
+            </div>
+            <div class="card-body">
+                <div class="row text-center">
+                    <div class="col-md-3 mb-3 mb-md-0">
+                        <div class="p-3 rounded bg-light shadow-sm">
+                            <h3 class="text-primary fw-bold mb-0"><i class="bi bi-newspaper"></i> {{ news_count }}</h3>
+                            <p class="mb-0">News Articles</p>
+                        </div>
+                    </div>
+                    <div class="col-md-3 mb-3 mb-md-0">
+                        <div class="p-3 rounded bg-light shadow-sm">
+                            <h3 class="text-info fw-bold mb-0"><i class="bi bi-cloud-sun"></i> {{ weather_count }}</h3>
+                            <p class="mb-0">Weather Records</p>
+                        </div>
+                    </div>
+                    <div class="col-md-3 mb-3 mb-md-0">
+                        <div class="p-3 rounded bg-light shadow-sm">
+                            <h3 class="text-success fw-bold mb-0"><i class="bi bi-check-circle"></i> Active</h3>
+                            <p class="mb-0">System Status</p>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="p-3 rounded bg-light shadow-sm">
+                            <h3 class="text-warning fw-bold mb-0"><i class="bi bi-clock-history"></i> 24/7</h3>
+                            <p class="mb-0">Monitoring</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,277 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Energy Alerts{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    {% if error %}
+        <div class="alert alert-danger" role="alert">
+            {{ error }}
+        </div>
+    {% else %}
+        <!-- Header -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <h1 class="h3 mb-0 text-gray-800">
+                    <i class="fas fa-exclamation-triangle text-warning"></i> Energy Consumption Alerts
+                </h1>
+                <p class="text-muted">Monitor and manage energy consumption alerts and warnings</p>
+            </div>
+        </div>
+
+        <!-- Generated Alerts -->
+        {% if generated_alerts %}
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card shadow">
+                    <div class="card-header py-3">
+                        <h6 class="m-0 font-weight-bold text-primary">
+                            <i class="fas fa-bell"></i> Active Alerts
+                        </h6>
+                    </div>
+                    <div class="card-body">
+                        {% for alert in generated_alerts %}
+                        <div class="alert alert-{% if alert.severity == 'critical' %}danger{% elif alert.severity == 'high' %}warning{% elif alert.severity == 'medium' %}info{% else %}success{% endif %} alert-dismissible fade show" role="alert">
+                            <div class="row">
+                                <div class="col-md-8">
+                                    <h6 class="alert-heading">
+                                        <i class="fas fa-exclamation-triangle"></i> {{ alert.title }}
+                                    </h6>
+                                    <p class="mb-0">{{ alert.message }}</p>
+                                </div>
+                                <div class="col-md-4 text-end">
+                                    <span class="badge bg-{% if alert.severity == 'critical' %}danger{% elif alert.severity == 'high' %}warning{% elif alert.severity == 'medium' %}info{% else %}success{% endif %}">
+                                        {{ alert.severity|title }}
+                                    </span>
+                                </div>
+                            </div>
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Database Alerts -->
+        {% if db_alerts %}
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card shadow">
+                    <div class="card-header py-3">
+                        <h6 class="m-0 font-weight-bold text-primary">
+                            <i class="fas fa-database"></i> Stored Alerts
+                        </h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-bordered">
+                                <thead>
+                                    <tr>
+                                        <th>Type</th>
+                                        <th>Title</th>
+                                        <th>Message</th>
+                                        <th>Severity</th>
+                                        <th>Created</th>
+                                        <th>Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for alert in db_alerts %}
+                                    <tr>
+                                        <td>
+                                            <span class="badge bg-secondary">{{ alert.alert_type|title }}</span>
+                                        </td>
+                                        <td>{{ alert.title }}</td>
+                                        <td>{{ alert.message }}</td>
+                                        <td>
+                                            <span class="badge bg-{% if alert.severity == 'critical' %}danger{% elif alert.severity == 'high' %}warning{% elif alert.severity == 'medium' %}info{% else %}success{% endif %}">
+                                                {{ alert.severity|title }}
+                                            </span>
+                                        </td>
+                                        <td>{{ alert.created_at|date:"M d, Y H:i" }}</td>
+                                        <td>
+                                            {% if alert.is_active %}
+                                                <span class="badge bg-success">Active</span>
+                                            {% else %}
+                                                <span class="badge bg-secondary">Inactive</span>
+                                            {% endif %}
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Alert Statistics -->
+        <div class="row mb-4">
+            <div class="col-xl-3 col-md-6 mb-4">
+                <div class="card border-left-danger shadow h-100 py-2">
+                    <div class="card-body">
+                        <div class="row no-gutters align-items-center">
+                            <div class="col mr-2">
+                                <div class="text-xs font-weight-bold text-danger text-uppercase mb-1">
+                                    Critical Alerts</div>
+                                <div class="h5 mb-0 font-weight-bold text-gray-800">
+                                    {{ generated_alerts|length|add:db_alerts|length }}
+                                </div>
+                            </div>
+                            <div class="col-auto">
+                                <i class="fas fa-exclamation-triangle fa-2x text-gray-300"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-xl-3 col-md-6 mb-4">
+                <div class="card border-left-warning shadow h-100 py-2">
+                    <div class="card-body">
+                        <div class="row no-gutters align-items-center">
+                            <div class="col mr-2">
+                                <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
+                                    High Priority</div>
+                                <div class="h5 mb-0 font-weight-bold text-gray-800">
+                                    {% if generated_alerts %}
+                                        {{ generated_alerts|length }}
+                                    {% else %}
+                                        0
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div class="col-auto">
+                                <i class="fas fa-exclamation-circle fa-2x text-gray-300"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-xl-3 col-md-6 mb-4">
+                <div class="card border-left-info shadow h-100 py-2">
+                    <div class="card-body">
+                        <div class="row no-gutters align-items-center">
+                            <div class="col mr-2">
+                                <div class="text-xs font-weight-bold text-info text-uppercase mb-1">
+                                    Medium Priority</div>
+                                <div class="h5 mb-0 font-weight-bold text-gray-800">
+                                    {% if db_alerts %}
+                                        {{ db_alerts|length }}
+                                    {% else %}
+                                        0
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div class="col-auto">
+                                <i class="fas fa-info-circle fa-2x text-gray-300"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-xl-3 col-md-6 mb-4">
+                <div class="card border-left-success shadow h-100 py-2">
+                    <div class="card-body">
+                        <div class="row no-gutters align-items-center">
+                            <div class="col mr-2">
+                                <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
+                                    Resolved</div>
+                                <div class="h5 mb-0 font-weight-bold text-gray-800">0</div>
+                            </div>
+                            <div class="col-auto">
+                                <i class="fas fa-check-circle fa-2x text-gray-300"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Alert Types Information -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card shadow">
+                    <div class="card-header py-3">
+                        <h6 class="m-0 font-weight-bold text-primary">
+                            <i class="fas fa-info-circle"></i> Alert Types
+                        </h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="alert alert-danger">
+                                    <h6><i class="fas fa-fire"></i> High Energy Consumption</h6>
+                                    <p class="mb-0">Triggered when devices consume more than 150% of average power consumption.</p>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="alert alert-warning">
+                                    <h6><i class="fas fa-rupee-sign"></i> Cost Warning</h6>
+                                    <p class="mb-0">Alerted when daily energy cost exceeds ₹100 threshold.</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="alert alert-info">
+                                    <h6><i class="fas fa-chart-line"></i> Efficiency Alert</h6>
+                                    <p class="mb-0">Warns when energy efficiency is below optimal levels.</p>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="alert alert-secondary">
+                                    <h6><i class="fas fa-search"></i> Anomaly Detection</h6>
+                                    <p class="mb-0">Detects unusual patterns in energy consumption data.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card shadow">
+                    <div class="card-header py-3">
+                        <h6 class="m-0 font-weight-bold text-primary">Quick Actions</h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-3 mb-3">
+                                <a href="{% url 'energy_analysis:dashboard' %}" class="btn btn-primary btn-block">
+                                    <i class="fas fa-tachometer-alt"></i> Dashboard
+                                </a>
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                <a href="{% url 'energy_analysis:utility_monitor' %}" class="btn btn-warning btn-block">
+                                    <i class="fas fa-tachometer-alt"></i> Utility Monitor
+                                </a>
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                <a href="{% url 'energy_analysis:visualization' %}" class="btn btn-success btn-block">
+                                    <i class="fas fa-chart-line"></i> View Charts
+                                </a>
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                <a href="{% url 'energy_analysis:predict' %}" class="btn btn-info btn-block">
+                                    <i class="fas fa-calculator"></i> Predict Usage
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    {% endif %}
+</div>
+{% endblock %} 

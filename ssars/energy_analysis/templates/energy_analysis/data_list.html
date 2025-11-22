@@ -1,0 +1,224 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Energy Data List{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    {% if error %}
+        <div class="alert alert-danger" role="alert">
+            {{ error }}
+        </div>
+    {% else %}
+        <!-- Header -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <h1 class="h3 mb-0 text-gray-800">
+                    <i class="fas fa-table text-primary"></i> Energy Data List
+                </h1>
+                <p class="text-muted">Browse and filter energy consumption data</p>
+            </div>
+        </div>
+
+        <!-- Filters -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card shadow">
+                    <div class="card-header py-3">
+                        <h6 class="m-0 font-weight-bold text-primary">Filters</h6>
+                    </div>
+                    <div class="card-body">
+                        <form method="get" class="row">
+                            <div class="col-md-3 mb-3">
+                                <label for="device_type" class="form-label">Device Type</label>
+                                <select name="device_type" id="device_type" class="form-control">
+                                    <option value="">All Devices</option>
+                                    {% for device_type in device_types %}
+                                    <option value="{{ device_type }}" {% if current_filters.device_type == device_type %}selected{% endif %}>
+                                        {{ device_type|title }}
+                                    </option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                <label for="room" class="form-label">Room</label>
+                                <select name="room" id="room" class="form-control">
+                                    <option value="">All Rooms</option>
+                                    {% for room in rooms %}
+                                    <option value="{{ room }}" {% if current_filters.room == room %}selected{% endif %}>
+                                        {{ room|title }}
+                                    </option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                <label for="home_id" class="form-label">Home ID</label>
+                                <select name="home_id" id="home_id" class="form-control">
+                                    <option value="">All Homes</option>
+                                    {% for home_id in home_ids %}
+                                    <option value="{{ home_id }}" {% if current_filters.home_id == home_id %}selected{% endif %}>
+                                        Home {{ home_id }}
+                                    </option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                <label class="form-label">&nbsp;</label>
+                                <div>
+                                    <button type="submit" class="btn btn-primary">
+                                        <i class="fas fa-filter"></i> Apply Filters
+                                    </button>
+                                    <a href="{% url 'energy_analysis:data_list' %}" class="btn btn-secondary">
+                                        <i class="fas fa-times"></i> Clear
+                                    </a>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Data Table -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card shadow">
+                    <div class="card-header py-3">
+                        <h6 class="m-0 font-weight-bold text-primary">
+                            Energy Data ({{ page_obj.paginator.count }} records)
+                        </h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-bordered table-striped">
+                                <thead class="table-dark">
+                                    <tr>
+                                        <th>Timestamp</th>
+                                        <th>Home ID</th>
+                                        <th>Device</th>
+                                        <th>Room</th>
+                                        <th>Power (W)</th>
+                                        <th>Status</th>
+                                        <th>Temperature (°C)</th>
+                                        <th>Humidity (%)</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for data in page_obj %}
+                                    <tr>
+                                        <td>{{ data.timestamp|date:"M d, Y H:i" }}</td>
+                                        <td>{{ data.home_id }}</td>
+                                        <td>{{ data.device_name|default:"N/A" }}</td>
+                                        <td>{{ data.room|default:"N/A" }}</td>
+                                        <td>{{ data.power_watt|floatformat:2 }}</td>
+                                        <td>
+                                            <span class="badge {% if data.status == 'on' %}bg-success{% else %}bg-secondary{% endif %}">
+                                                {{ data.status|default:"N/A" }}
+                                            </span>
+                                        </td>
+                                        <td>{{ data.indoor_temp|floatformat:1|default:"N/A" }}</td>
+                                        <td>{{ data.humidity|floatformat:1|default:"N/A" }}</td>
+                                    </tr>
+                                    {% empty %}
+                                    <tr>
+                                        <td colspan="8" class="text-center text-muted">
+                                            No data available with current filters
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <!-- Pagination -->
+                        {% if page_obj.has_other_pages %}
+                        <nav aria-label="Data pagination">
+                            <ul class="pagination justify-content-center">
+                                {% if page_obj.has_previous %}
+                                <li class="page-item">
+                                    <a class="page-link" href="?page=1{% if current_filters.device_type %}&device_type={{ current_filters.device_type }}{% endif %}{% if current_filters.room %}&room={{ current_filters.room }}{% endif %}{% if current_filters.home_id %}&home_id={{ current_filters.home_id }}{% endif %}">
+                                        <i class="fas fa-angle-double-left"></i>
+                                    </a>
+                                </li>
+                                <li class="page-item">
+                                    <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if current_filters.device_type %}&device_type={{ current_filters.device_type }}{% endif %}{% if current_filters.room %}&room={{ current_filters.room }}{% endif %}{% if current_filters.home_id %}&home_id={{ current_filters.home_id }}{% endif %}">
+                                        <i class="fas fa-angle-left"></i>
+                                    </a>
+                                </li>
+                                {% endif %}
+
+                                {% for num in page_obj.paginator.page_range %}
+                                    {% if page_obj.number == num %}
+                                    <li class="page-item active">
+                                        <span class="page-link">{{ num }}</span>
+                                    </li>
+                                    {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                                    <li class="page-item">
+                                        <a class="page-link" href="?page={{ num }}{% if current_filters.device_type %}&device_type={{ current_filters.device_type }}{% endif %}{% if current_filters.room %}&room={{ current_filters.room }}{% endif %}{% if current_filters.home_id %}&home_id={{ current_filters.home_id }}{% endif %}">
+                                            {{ num }}
+                                        </a>
+                                    </li>
+                                    {% endif %}
+                                {% endfor %}
+
+                                {% if page_obj.has_next %}
+                                <li class="page-item">
+                                    <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if current_filters.device_type %}&device_type={{ current_filters.device_type }}{% endif %}{% if current_filters.room %}&room={{ current_filters.room }}{% endif %}{% if current_filters.home_id %}&home_id={{ current_filters.home_id }}{% endif %}">
+                                        <i class="fas fa-angle-right"></i>
+                                    </a>
+                                </li>
+                                <li class="page-item">
+                                    <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}{% if current_filters.device_type %}&device_type={{ current_filters.device_type }}{% endif %}{% if current_filters.room %}&room={{ current_filters.room }}{% endif %}{% if current_filters.home_id %}&home_id={{ current_filters.home_id }}{% endif %}">
+                                        <i class="fas fa-angle-double-right"></i>
+                                    </a>
+                                </li>
+                                {% endif %}
+                            </ul>
+                        </nav>
+                        {% endif %}
+
+                        <div class="text-center text-muted">
+                            Showing {{ page_obj.start_index }} to {{ page_obj.end_index }} of {{ page_obj.paginator.count }} entries
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card shadow">
+                    <div class="card-header py-3">
+                        <h6 class="m-0 font-weight-bold text-primary">Quick Actions</h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-3 mb-3">
+                                <a href="{% url 'energy_analysis:dashboard' %}" class="btn btn-primary btn-block">
+                                    <i class="fas fa-tachometer-alt"></i> Dashboard
+                                </a>
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                <a href="{% url 'energy_analysis:visualization' %}" class="btn btn-success btn-block">
+                                    <i class="fas fa-chart-line"></i> View Charts
+                                </a>
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                <a href="{% url 'energy_analysis:alerts' %}" class="btn btn-warning btn-block">
+                                    <i class="fas fa-exclamation-triangle"></i> View Alerts
+                                </a>
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                <a href="{% url 'energy_analysis:utility_monitor' %}" class="btn btn-info btn-block">
+                                    <i class="fas fa-tachometer-alt"></i> Utility Monitor
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    {% endif %}
+</div>
+{% endblock %} 

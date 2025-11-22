@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>SSARS - Smart Society Alert & Resource System</title>
+	<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.1/dist/css/bootstrap.min.css" rel="stylesheet" crossorigin="anonymous" />
+	<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.7.2/font/bootstrap-icons.css" rel="stylesheet" crossorigin="anonymous" />
+	<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.1/dist/js/bootstrap.bundle.min.js" crossorigin="anonymous"></script>
+	<meta name="viewport" content="width=device-width, initial-scale=1" />
+	<style>
+		/* Custom styles for navigation and footer */
+		.navbar-brand {
+			font-weight: bold;
+			font-size: 1.5rem;
+		}
+		
+		.navbar-nav-center {
+			margin: 0 auto;
+		}
+		
+		.navbar-nav-right {
+			margin-left: auto;
+		}
+		
+		.footer {
+			text-align: center;
+			padding: 1rem 0;
+			background-color: #f8f9fa;
+			border-top: 1px solid #dee2e6;
+		}
+		
+		/* Responsive adjustments */
+		@media (max-width: 991.98px) {
+			.navbar-nav-center {
+				margin: 0;
+				text-align: center;
+			}
+			
+			.navbar-nav-right {
+				margin: 0;
+				text-align: center;
+			}
+		}
+	</style>
+</head>
+<body>
+	<nav class="navbar navbar-expand-lg navbar-light bg-light mb-3">
+		<div class="container">
+			<!-- Logo/Brand on the left -->
+			<a class="navbar-brand" href="{% url 'home' %}">
+				<i class="bi bi-shield-check text-primary"></i> SSARS
+			</a>
+			
+			<!-- Mobile toggle button -->
+			<button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavAltMarkup" aria-controls="navbarNavAltMarkup" aria-expanded="false" aria-label="Toggle navigation">
+				<span class="navbar-toggler-icon"></span>
+			</button>
+			
+			<!-- Navigation content -->
+			<div class="collapse navbar-collapse" id="navbarNavAltMarkup">
+				<!-- Center navigation links -->
+				<div class="navbar-nav navbar-nav-center">
+					<a class="nav-link" href="{% url 'home' %}">
+						<i class="bi bi-house"></i> Home
+					</a>
+					<a class="nav-link" href="{% url 'news' %}">
+						<i class="bi bi-newspaper"></i> News
+					</a>
+					<a class="nav-link" href="{% url 'weather' %}">
+						<i class="bi bi-cloud-sun"></i> Weather
+					</a>
+					<a class="nav-link" href="{% url 'weather_alerts' %}">
+						<i class="bi bi-exclamation-triangle"></i> Alerts
+					</a>
+					<a class="nav-link" href="{% url 'energy_analysis:dashboard' %}">
+						<i class="bi bi-lightning"></i> Energy Analysis
+					</a>
+					<a class="nav-link" href="{% url 'energy_analysis:utility_monitor' %}">
+						<i class="bi bi-speedometer2"></i> Utility Monitor
+					</a>
+				</div>
+				
+				<!-- Right side - Login/Signup -->
+				<div class="navbar-nav navbar-nav-right">
+					{% if user.is_authenticated %}
+						<div class="nav-item dropdown">
+							<a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+								<i class="bi bi-person-circle"></i> {{ user.username }}
+							</a>
+							<ul class="dropdown-menu" aria-labelledby="navbarDropdown">
+								<li><a class="dropdown-item" href="{% url 'logoutaccount' %}">
+									<i class="bi bi-box-arrow-right"></i> Logout
+								</a></li>
+							</ul>
+						</div>
+					{% else %}
+						<a class="nav-link" href="{% url 'loginaccount' %}">
+							<i class="bi bi-box-arrow-in-right"></i> Login
+						</a>
+						<a class="nav-link" href="{% url 'signupaccount' %}">
+							<i class="bi bi-person-plus"></i> Sign Up
+						</a>
+					{% endif %}
+				</div>
+			</div>
+		</div>
+	</nav>
+	
+	<div class="container">
+		{% block content %}
+		{% endblock content %}
+	</div>
+	
+	<!-- Centered Footer -->
+	<footer class="footer mt-4">
+		<div class="container">
+			<div class="row">
+				<div class="col-12">
+					<p class="mb-0">
+						<i class="bi bi-c-circle"></i> 2025 SSARS Project | Developed for Smart Communities
+					</p>
+					<small class="text-muted">
+						Smart Society Alert & Resource System - Empowering communities with intelligent monitoring
+					</small>
+				</div>
+			</div>
+		</div>
+	</footer>
+</body>
+</html>

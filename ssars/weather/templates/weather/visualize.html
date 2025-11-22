@@ -1,0 +1,345 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <h2 class="mb-4"><i class="bi bi-bar-chart"></i> Enhanced Weather Data Visualization & Analysis</h2>
+        
+        <!-- Filter Form -->
+        <div class="card border-0 shadow-lg mb-4">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0"><i class="bi bi-funnel"></i> Data Filters & Analysis Options</h5>
+            </div>
+            <div class="card-body">
+                <form method="GET" class="row g-3">
+                    <div class="col-md-3">
+                        <label for="start_date" class="form-label fw-bold">Start Date</label>
+                        <input type="date" class="form-control" id="start_date" name="start_date" 
+                               value="{{ form_data.start_date|default:'' }}"
+                               min="{{ date_range.min_date }}" max="{{ date_range.max_date }}">
+                        <div class="form-text">Available: {{ date_range.min_date }} to {{ date_range.max_date }}</div>
+                    </div>
+                    <div class="col-md-3">
+                        <label for="end_date" class="form-label fw-bold">End Date</label>
+                        <input type="date" class="form-control" id="end_date" name="end_date" 
+                               value="{{ form_data.end_date|default:'' }}"
+                               min="{{ date_range.min_date }}" max="{{ date_range.max_date }}">
+                        <div class="form-text">Select date range for analysis</div>
+                    </div>
+                    <div class="col-md-4">
+                        <label for="city" class="form-label fw-bold">City Filter (Optional)</label>
+                        <input type="text" class="form-control" id="city" name="city" 
+                               placeholder="e.g., Mumbai, Delhi, London"
+                               value="{{ form_data.city|default:'' }}">
+                        <div class="form-text">Enter city name to filter data</div>
+                    </div>
+                    <div class="col-md-2 d-flex align-items-end">
+                        <button type="submit" class="btn btn-primary w-100">
+                            <i class="bi bi-search"></i> Analyze Data
+                        </button>
+                    </div>
+                </form>
+                
+                {% if date_filter_applied %}
+                <div class="alert alert-info mt-3 mb-0">
+                    <i class="bi bi-info-circle"></i> <strong>Filter Applied:</strong> 
+                    Showing data from {{ weather_stats.date_range }}
+                    {% if form_data.city %} for cities containing "{{ form_data.city }}"{% endif %}
+                </div>
+                {% endif %}
+            </div>
+        </div>
+        
+        {% if error_message %}
+        <div class="alert alert-danger" role="alert">
+            <i class="bi bi-exclamation-triangle"></i> {{ error_message }}
+        </div>
+        {% endif %}
+        
+        {% if has_data %}
+            <!-- Enhanced Statistics Summary -->
+            <div class="row mb-4">
+                <div class="col-12">
+                    <div class="card border-0 shadow-lg">
+                        <div class="card-header bg-info text-white">
+                            <h5 class="mb-0"><i class="bi bi-graph-up"></i> Weather Data Statistics with Min-Max Ranges</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="row text-center mb-4">
+                                <div class="col-md-2">
+                                    <div class="h4 text-primary fw-bold">{{ weather_stats.total_records|floatformat:0 }}</div>
+                                    <small class="text-muted">Total Records</small>
+                                    {% if weather_stats.filtered %}
+                                    <div class="small text-warning">({{ weather_stats.original_count|floatformat:0 }} originally)</div>
+                                    {% endif %}
+                                </div>
+                                <div class="col-md-2">
+                                    <div class="h4 text-success fw-bold">{{ weather_stats.cities_count }}</div>
+                                    <small class="text-muted">Cities</small>
+                                </div>
+                                <div class="col-md-2">
+                                    <div class="h4 text-info fw-bold">CSV Data</div>
+                                    <small class="text-muted">Data Source</small>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="h5 text-dark fw-bold">{{ weather_stats.date_range }}</div>
+                                    <small class="text-muted">Date Range Analyzed</small>
+                                </div>
+                            </div>
+                            
+                            <!-- Parameter Statistics -->
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <div class="card border-danger">
+                                        <div class="card-header bg-danger text-white text-center">
+                                            <h6 class="mb-0"><i class="bi bi-thermometer"></i> Temperature Stats</h6>
+                                        </div>
+                                        <div class="card-body">
+                                            <p><strong>Average:</strong> {{ weather_stats.temperature.avg }}°C</p>
+                                            <p><strong>Range:</strong> {{ weather_stats.temperature.min }}°C to {{ weather_stats.temperature.max }}°C</p>
+                                            <p><strong>Total Range:</strong> {{ weather_stats.temperature.range }}°C</p>
+                                            <p><strong>Std Deviation:</strong> {{ weather_stats.temperature.std }}°C</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="card border-primary">
+                                        <div class="card-header bg-primary text-white text-center">
+                                            <h6 class="mb-0"><i class="bi bi-droplet"></i> Humidity Stats</h6>
+                                        </div>
+                                        <div class="card-body">
+                                            <p><strong>Average:</strong> {{ weather_stats.humidity.avg }}%</p>
+                                            <p><strong>Range:</strong> {{ weather_stats.humidity.min }}% to {{ weather_stats.humidity.max }}%</p>
+                                            <p><strong>Total Range:</strong> {{ weather_stats.humidity.range }}%</p>
+                                            <p><strong>Std Deviation:</strong> {{ weather_stats.humidity.std }}%</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="card border-success">
+                                        <div class="card-header bg-success text-white text-center">
+                                            <h6 class="mb-0"><i class="bi bi-speedometer"></i> Pressure Stats</h6>
+                                        </div>
+                                        <div class="card-body">
+                                            <p><strong>Average:</strong> {{ weather_stats.pressure.avg }} hPa</p>
+                                            <p><strong>Range:</strong> {{ weather_stats.pressure.min }} hPa to {{ weather_stats.pressure.max }} hPa</p>
+                                            <p><strong>Total Range:</strong> {{ weather_stats.pressure.range }} hPa</p>
+                                            <p><strong>Std Deviation:</strong> {{ weather_stats.pressure.std }} hPa</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Temperature Analysis with Min-Max Ranges -->
+            <div class="row mb-4">
+                <div class="col-12">
+                    <div class="card border-0 shadow-lg">
+                        <div class="card-header bg-danger text-white">
+                            <h5 class="mb-0"><i class="bi bi-thermometer"></i> Temperature Analysis with Min-Max Ranges</h5>
+                        </div>
+                        <div class="card-body">
+                            <img src="data:image/png;base64,{{ charts.temperature }}" class="img-fluid" alt="Temperature Analysis">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Humidity Analysis with Min-Max Ranges -->
+            <div class="row mb-4">
+                <div class="col-12">
+                    <div class="card border-0 shadow-lg">
+                        <div class="card-header bg-primary text-white">
+                            <h5 class="mb-0"><i class="bi bi-droplet"></i> Humidity Analysis with Min-Max Ranges</h5>
+                        </div>
+                        <div class="card-body">
+                            <img src="data:image/png;base64,{{ charts.humidity }}" class="img-fluid" alt="Humidity Analysis">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Pressure Analysis with Min-Max Ranges -->
+            <div class="row mb-4">
+                <div class="col-12">
+                    <div class="card border-0 shadow-lg">
+                        <div class="card-header bg-success text-white">
+                            <h5 class="mb-0"><i class="bi bi-speedometer"></i> Pressure Analysis with Min-Max Ranges</h5>
+                        </div>
+                        <div class="card-body">
+                            <img src="data:image/png;base64,{{ charts.pressure }}" class="img-fluid" alt="Pressure Analysis">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Multi-Parameter Trends -->
+            <div class="row mb-4">
+                <div class="col-12">
+                    <div class="card border-0 shadow-lg">
+                        <div class="card-header bg-dark text-white">
+                            <h5 class="mb-0"><i class="bi bi-graph-up-arrow"></i> Multi-Parameter Trends with Ranges</h5>
+                        </div>
+                        <div class="card-body">
+                            <img src="data:image/png;base64,{{ charts.multi_trends }}" class="img-fluid" alt="Multi-Parameter Trends">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- City Distribution -->
+            <div class="row mb-4">
+                <div class="col-12">
+                    <div class="card border-0 shadow-lg">
+                        <div class="card-header bg-warning text-dark">
+                            <h5 class="mb-0"><i class="bi bi-geo-alt"></i> City-wise Weather Distribution</h5>
+                        </div>
+                        <div class="card-body">
+                            <img src="data:image/png;base64,{{ charts.city_distribution }}" class="img-fluid" alt="City Distribution">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Hourly Patterns -->
+            <div class="row mb-4">
+                <div class="col-12">
+                    <div class="card border-0 shadow-lg">
+                        <div class="card-header bg-secondary text-white">
+                            <h5 class="mb-0"><i class="bi bi-clock"></i> Hourly Weather Patterns with Ranges</h5>
+                        </div>
+                        <div class="card-body">
+                            <img src="data:image/png;base64,{{ charts.hourly_patterns }}" class="img-fluid" alt="Hourly Patterns">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Monthly Analysis -->
+            <div class="row mb-4">
+                <div class="col-12">
+                    <div class="card border-0 shadow-lg">
+                        <div class="card-header bg-info text-white">
+                            <h5 class="mb-0"><i class="bi bi-calendar3"></i> Monthly Weather Analysis with Ranges</h5>
+                        </div>
+                        <div class="card-body">
+                            <img src="data:image/png;base64,{{ charts.monthly_analysis }}" class="img-fluid" alt="Monthly Analysis">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Weather Type Distribution -->
+            {% if charts.weather_types %}
+            <div class="row mb-4">
+                <div class="col-12">
+                    <div class="card border-0 shadow-lg">
+                        <div class="card-header bg-purple text-white" style="background-color: #6f42c1;">
+                            <h5 class="mb-0"><i class="bi bi-cloud-sun"></i> Weather Type Distribution</h5>
+                        </div>
+                        <div class="card-body">
+                            <img src="data:image/png;base64,{{ charts.weather_types }}" class="img-fluid" alt="Weather Types">
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Correlation Analysis -->
+            <div class="row mb-4">
+                <div class="col-12">
+                    <div class="card border-0 shadow-lg">
+                        <div class="card-header bg-dark text-white">
+                            <h5 class="mb-0"><i class="bi bi-diagram-3"></i> Weather Parameters Correlation Matrix</h5>
+                        </div>
+                        <div class="card-body">
+                            <img src="data:image/png;base64,{{ charts.correlation }}" class="img-fluid" alt="Correlation Matrix">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Daily Weather Summary -->
+            <div class="row mb-4">
+                <div class="col-12">
+                    <div class="card border-0 shadow-lg">
+                        <div class="card-header bg-gradient text-white" style="background: linear-gradient(45deg, #ff6b6b, #4ecdc4);">
+                            <h5 class="mb-0"><i class="bi bi-bar-chart-line"></i> Daily Weather Summary & Recent Trends</h5>
+                        </div>
+                        <div class="card-body">
+                            <img src="data:image/png;base64,{{ charts.daily_summary }}" class="img-fluid" alt="Daily Summary">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Available Cities Info -->
+            {% if available_cities %}
+            <div class="row mb-4">
+                <div class="col-12">
+                    <div class="card border-0 shadow-lg">
+                        <div class="card-header bg-light text-dark">
+                            <h5 class="mb-0"><i class="bi bi-list-ul"></i> Available Cities in Dataset</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                {% for city in available_cities|slice:":20" %}
+                                <div class="col-md-3 mb-2">
+                                    <span class="badge bg-secondary">{{ city }}</span>
+                                </div>
+                                {% endfor %}
+                            </div>
+                            {% if available_cities|length > 20 %}
+                            <p class="text-muted mt-3">... and {{ available_cities|length|add:"-20" }} more cities</p>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+            
+        {% else %}
+            <div class="alert alert-warning">
+                <h5><i class="bi bi-exclamation-triangle"></i> No Weather Data Available</h5>
+                <p>Please ensure that the weather_data.csv file exists in the static/data directory and contains valid weather data.</p>
+                <p><strong>Expected columns:</strong> dt_txt, city, temp, humidity, pressure</p>
+            </div>
+        {% endif %}
+    </div>
+</div>
+
+<style>
+.card {
+    transition: transform 0.2s;
+}
+.card:hover {
+    transform: translateY(-2px);
+}
+.bg-gradient {
+    background: linear-gradient(45deg, #667eea 0%, #764ba2 100%) !important;
+}
+</style>
+
+<script>
+// Auto-fill end date when start date is selected
+document.getElementById('start_date').addEventListener('change', function() {
+    const startDate = new Date(this.value);
+    const endDateInput = document.getElementById('end_date');
+    
+    if (!endDateInput.value) {
+        // Set end date to 30 days after start date, or max date, whichever is earlier
+        const endDate = new Date(startDate);
+        endDate.setDate(endDate.getDate() + 30);
+        
+        const maxDate = new Date('{{ date_range.max_date }}');
+        if (endDate > maxDate) {
+            endDateInput.value = '{{ date_range.max_date }}';
+        } else {
+            endDateInput.value = endDate.toISOString().split('T')[0];
+        }
+    }
+});
+</script>
+{% endblock %} 

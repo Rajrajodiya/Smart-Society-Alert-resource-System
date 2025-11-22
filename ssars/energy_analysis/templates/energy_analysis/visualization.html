@@ -1,0 +1,258 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Energy Visualization{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    {% if error %}
+        <div class="alert alert-danger" role="alert">
+            {{ error }}
+        </div>
+    {% else %}
+        <!-- Header -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <h1 class="h3 mb-0 text-gray-800">
+                    <i class="fas fa-chart-line text-primary"></i> Energy Consumption Visualizations
+                </h1>
+                <p class="text-muted">Interactive charts and analysis of energy consumption patterns</p>
+            </div>
+        </div>
+
+        <!-- Filters -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card shadow">
+                    <div class="card-header py-3">
+                        <h6 class="m-0 font-weight-bold text-primary">Filter Options</h6>
+                    </div>
+                    <div class="card-body">
+                        <form method="GET" class="row">
+                            <div class="col-md-3 mb-3">
+                                <label for="device_type" class="form-label">Device Type</label>
+                                <select name="device_type" id="device_type" class="form-select">
+                                    <option value="">All Devices</option>
+                                    {% for device in device_types %}
+                                    <option value="{{ device }}" {% if current_filters.device_type == device %}selected{% endif %}>
+                                        {{ device|title }}
+                                    </option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                <label for="room" class="form-label">Room</label>
+                                <select name="room" id="room" class="form-select">
+                                    <option value="">All Rooms</option>
+                                    {% for room in rooms %}
+                                    <option value="{{ room }}" {% if current_filters.room == room %}selected{% endif %}>
+                                        {{ room|title }}
+                                    </option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                <label for="home_id" class="form-label">Home ID</label>
+                                <select name="home_id" id="home_id" class="form-select">
+                                    <option value="">All Homes</option>
+                                    {% for home in home_ids %}
+                                    <option value="{{ home }}" {% if current_filters.home_id == home|stringformat:"s" %}selected{% endif %}>
+                                        Home {{ home }}
+                                    </option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                <label class="form-label">&nbsp;</label>
+                                <div>
+                                    <button type="submit" class="btn btn-primary">
+                                        <i class="fas fa-filter"></i> Apply Filters
+                                    </button>
+                                    <a href="{% url 'energy_analysis:visualization' %}" class="btn btn-secondary">
+                                        <i class="fas fa-times"></i> Clear
+                                    </a>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Charts Row 1 -->
+        <div class="row mb-4">
+            <!-- Energy Consumption Over Time -->
+            <div class="col-xl-8">
+                <div class="card shadow mb-4">
+                    <div class="card-header py-3">
+                        <h6 class="m-0 font-weight-bold text-primary">Energy Consumption Over Time</h6>
+                    </div>
+                    <div class="card-body">
+                        {% if charts.time_series %}
+                        <img src="data:image/png;base64,{{ charts.time_series }}" class="img-fluid" alt="Energy Consumption Over Time">
+                        {% else %}
+                        <p class="text-muted">No data available</p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Device Consumption -->
+            <div class="col-xl-4">
+                <div class="card shadow mb-4">
+                    <div class="card-header py-3">
+                        <h6 class="m-0 font-weight-bold text-primary">Device Consumption</h6>
+                    </div>
+                    <div class="card-body">
+                        {% if charts.device_consumption %}
+                        <img src="data:image/png;base64,{{ charts.device_consumption }}" class="img-fluid" alt="Device Consumption">
+                        {% else %}
+                        <p class="text-muted">No data available</p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Charts Row 2 -->
+        <div class="row mb-4">
+            <!-- Room Consumption -->
+            <div class="col-xl-6">
+                <div class="card shadow mb-4">
+                    <div class="card-header py-3">
+                        <h6 class="m-0 font-weight-bold text-primary">Room-wise Consumption</h6>
+                    </div>
+                    <div class="card-body">
+                        {% if charts.room_consumption %}
+                        <img src="data:image/png;base64,{{ charts.room_consumption }}" class="img-fluid" alt="Room Consumption">
+                        {% else %}
+                        <p class="text-muted">No data available</p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Hourly Pattern -->
+            <div class="col-xl-6">
+                <div class="card shadow mb-4">
+                    <div class="card-header py-3">
+                        <h6 class="m-0 font-weight-bold text-primary">Hourly Consumption Pattern</h6>
+                    </div>
+                    <div class="card-body">
+                        {% if charts.hourly_pattern %}
+                        <img src="data:image/png;base64,{{ charts.hourly_pattern }}" class="img-fluid" alt="Hourly Pattern">
+                        {% else %}
+                        <p class="text-muted">No data available</p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Charts Row 3 -->
+        <div class="row mb-4">
+            <!-- Correlation Heatmap -->
+            <div class="col-xl-6">
+                <div class="card shadow mb-4">
+                    <div class="card-header py-3">
+                        <h6 class="m-0 font-weight-bold text-primary">Correlation Heatmap</h6>
+                    </div>
+                    <div class="card-body">
+                        {% if charts.correlation %}
+                        <img src="data:image/png;base64,{{ charts.correlation }}" class="img-fluid" alt="Correlation Heatmap">
+                        {% else %}
+                        <p class="text-muted">No data available</p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Cost Analysis -->
+            <div class="col-xl-6">
+                <div class="card shadow mb-4">
+                    <div class="card-header py-3">
+                        <h6 class="m-0 font-weight-bold text-primary">Daily Energy Cost</h6>
+                    </div>
+                    <div class="card-body">
+                        {% if charts.cost_analysis %}
+                        <img src="data:image/png;base64,{{ charts.cost_analysis }}" class="img-fluid" alt="Cost Analysis">
+                        {% else %}
+                        <p class="text-muted">No data available</p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Analysis Insights -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card shadow">
+                    <div class="card-header py-3">
+                        <h6 class="m-0 font-weight-bold text-primary">
+                            <i class="fas fa-lightbulb"></i> Analysis Insights
+                        </h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <h6>Key Findings:</h6>
+                                <ul>
+                                    <li>Refrigerators are the highest energy consumers</li>
+                                    <li>Kitchen devices contribute significantly to total consumption</li>
+                                    <li>Lighting shows clear on/off patterns</li>
+                                    <li>Temperature affects energy consumption patterns</li>
+                                </ul>
+                            </div>
+                            <div class="col-md-6">
+                                <h6>Recommendations:</h6>
+                                <ul>
+                                    <li>Optimize refrigerator settings</li>
+                                    <li>Use energy-efficient lighting</li>
+                                    <li>Implement smart scheduling</li>
+                                    <li>Monitor temperature settings</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card shadow">
+                    <div class="card-header py-3">
+                        <h6 class="m-0 font-weight-bold text-primary">Quick Actions</h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-3 mb-3">
+                                <a href="{% url 'energy_analysis:dashboard' %}" class="btn btn-primary btn-block">
+                                    <i class="fas fa-tachometer-alt"></i> Dashboard
+                                </a>
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                <a href="{% url 'energy_analysis:train_model' %}" class="btn btn-success btn-block">
+                                    <i class="fas fa-brain"></i> Train Model
+                                </a>
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                <a href="{% url 'energy_analysis:predict' %}" class="btn btn-info btn-block">
+                                    <i class="fas fa-calculator"></i> Predict Usage
+                                </a>
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                <a href="{% url 'energy_analysis:utility_monitor' %}" class="btn btn-warning btn-block">
+                                    <i class="fas fa-tachometer-alt"></i> Utility Monitor
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    {% endif %}
+</div>
+{% endblock %} 

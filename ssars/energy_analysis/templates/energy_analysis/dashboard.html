@@ -1,0 +1,471 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Energy Analysis Dashboard{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    {% if error %}
+        <div class="alert alert-danger" role="alert">
+            <i class="fas fa-exclamation-triangle"></i> {{ error }}
+        </div>
+    {% elif not has_data %}
+        <div class="alert alert-warning" role="alert">
+            <i class="fas fa-info-circle"></i> No energy data available. Please check your data source.
+        </div>
+    {% else %}
+        <!-- Header -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <h1 class="h3 mb-0 text-gray-800">
+                    <i class="fas fa-bolt text-warning"></i> Energy Analysis Dashboard
+                </h1>
+                <p class="text-muted">Comprehensive Smart Home Energy Monitoring, Visualization & Analysis</p>
+                <small class="text-info">Data Range: {{ date_range }} | Total Records: {{ data_points|floatformat:0 }}</small>
+            </div>
+        </div>
+
+        <!-- Key Metrics Cards -->
+        <div class="row mb-4">
+            <div class="col-xl-3 col-md-6 mb-4">
+                <div class="card border-left-primary shadow h-100 py-2">
+                    <div class="card-body">
+                        <div class="row no-gutters align-items-center">
+                            <div class="col mr-2">
+                                <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
+                                    Total Power Consumption</div>
+                                <div class="h5 mb-0 font-weight-bold text-gray-800">{{ total_consumption|floatformat:0 }} W</div>
+                                <div class="text-xs text-muted">{{ monitoring_stats.total_consumption_kwh|floatformat:2 }} kWh</div>
+                            </div>
+                            <div class="col-auto">
+                                <i class="fas fa-bolt fa-2x text-gray-300"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-xl-3 col-md-6 mb-4">
+                <div class="card border-left-success shadow h-100 py-2">
+                    <div class="card-body">
+                        <div class="row no-gutters align-items-center">
+                            <div class="col mr-2">
+                                <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
+                                    Total Energy Cost</div>
+                                <div class="h5 mb-0 font-weight-bold text-gray-800">${{ total_cost|floatformat:2 }}</div>
+                                <div class="text-xs text-muted">Avg Daily: ${{ monitoring_stats.daily_avg_cost|floatformat:2 }}</div>
+                            </div>
+                            <div class="col-auto">
+                                <i class="fas fa-dollar-sign fa-2x text-gray-300"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-xl-3 col-md-6 mb-4">
+                <div class="card border-left-info shadow h-100 py-2">
+                    <div class="card-body">
+                        <div class="row no-gutters align-items-center">
+                            <div class="col mr-2">
+                                <div class="text-xs font-weight-bold text-info text-uppercase mb-1">
+                                    Device Types</div>
+                                <div class="h5 mb-0 font-weight-bold text-gray-800">{{ total_devices }}</div>
+                                <div class="text-xs text-muted">{{ unique_rooms }} Rooms Monitored</div>
+                            </div>
+                            <div class="col-auto">
+                                <i class="fas fa-plug fa-2x text-gray-300"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-xl-3 col-md-6 mb-4">
+                <div class="card border-left-warning shadow h-100 py-2">
+                    <div class="card-body">
+                        <div class="row no-gutters align-items-center">
+                            <div class="col mr-2">
+                                <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
+                                    Efficiency Score</div>
+                                <div class="h5 mb-0 font-weight-bold text-gray-800">{{ efficiency_ratio|floatformat:1 }}%</div>
+                                <div class="text-xs text-muted">Peak Hour: {{ monitoring_stats.peak_consumption_hour }}:00</div>
+                            </div>
+                            <div class="col-auto">
+                                <i class="fas fa-tachometer-alt fa-2x text-gray-300"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Alerts Section -->
+        {% if recent_alerts %}
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card shadow">
+                    <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                        <h6 class="m-0 font-weight-bold text-primary">
+                            <i class="fas fa-exclamation-triangle"></i> Smart Energy Alerts
+                        </h6>
+                        <a href="{% url 'energy_analysis:alerts' %}" class="btn btn-sm btn-primary">View All Alerts</a>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            {% for alert in recent_alerts %}
+                            <div class="col-md-4 mb-3">
+                                <div class="alert alert-{% if alert.severity == 'warning' %}warning{% elif alert.severity == 'info' %}info{% else %}danger{% endif %} mb-2" role="alert">
+                                    <strong>{{ alert.title }}</strong><br>
+                                    <small>{{ alert.message }}</small>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Key Insights Cards -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card shadow">
+                    <div class="card-header py-3">
+                        <h6 class="m-0 font-weight-bold text-primary">
+                            <i class="fas fa-lightbulb"></i> Energy Insights & Recommendations
+                        </h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            {% for insight in insights %}
+                            <div class="col-md-3 mb-3">
+                                <div class="text-center">
+                                    <div class="text-primary mb-2">
+                                        <i class="fas fa-{{ insight.icon }} fa-2x"></i>
+                                    </div>
+                                    <h5 class="font-weight-bold">{{ insight.value }}</h5>
+                                    <h6 class="text-muted">{{ insight.title }}</h6>
+                                    <small class="text-secondary">{{ insight.description }}</small>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Visualization Charts Section -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card shadow mb-4">
+                    <div class="card-header py-3">
+                        <h6 class="m-0 font-weight-bold text-primary">
+                            <i class="fas fa-chart-line"></i> Energy Consumption Visualizations
+                        </h6>
+                    </div>
+                    <div class="card-body">
+                        <!-- Time Series and Device Consumption -->
+                        <div class="row mb-4">
+                            <div class="col-xl-8">
+                                <h6 class="text-secondary mb-3">Energy Consumption Over Time</h6>
+                                {% if charts.time_series %}
+                                <img src="data:image/png;base64,{{ charts.time_series }}" class="img-fluid" alt="Energy Consumption Over Time">
+                                {% else %}
+                                <p class="text-muted">No time series data available</p>
+                                {% endif %}
+                            </div>
+                            <div class="col-xl-4">
+                                <h6 class="text-secondary mb-3">Device Type Consumption</h6>
+                                {% if charts.device_consumption %}
+                                <img src="data:image/png;base64,{{ charts.device_consumption }}" class="img-fluid" alt="Device Consumption">
+                                {% else %}
+                                <p class="text-muted">No device data available</p>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <!-- Room Distribution and Hourly Pattern -->
+                        <div class="row mb-4">
+                            <div class="col-xl-6">
+                                <h6 class="text-secondary mb-3">Room-wise Distribution</h6>
+                                {% if charts.room_consumption %}
+                                <img src="data:image/png;base64,{{ charts.room_consumption }}" class="img-fluid" alt="Room Consumption">
+                                {% else %}
+                                <p class="text-muted">No room data available</p>
+                                {% endif %}
+                            </div>
+                            <div class="col-xl-6">
+                                <h6 class="text-secondary mb-3">Hourly Consumption Pattern</h6>
+                                {% if charts.hourly_pattern %}
+                                <img src="data:image/png;base64,{{ charts.hourly_pattern }}" class="img-fluid" alt="Hourly Pattern">
+                                {% else %}
+                                <p class="text-muted">No hourly pattern data available</p>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Monitoring & Analysis Dashboard -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card shadow mb-4">
+                    <div class="card-header py-3">
+                        <h6 class="m-0 font-weight-bold text-primary">
+                            <i class="fas fa-chart-area"></i> Cost Monitoring & Efficiency Analysis
+                        </h6>
+                    </div>
+                    <div class="card-body">
+                        {% if charts.monitoring_analysis %}
+                        <img src="data:image/png;base64,{{ charts.monitoring_analysis }}" class="img-fluid" alt="Monitoring Analysis">
+                        {% else %}
+                        <p class="text-muted">No monitoring analysis data available</p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Correlation Analysis -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card shadow mb-4">
+                    <div class="card-header py-3">
+                        <h6 class="m-0 font-weight-bold text-primary">
+                            <i class="fas fa-project-diagram"></i> Environmental Factors Correlation
+                        </h6>
+                    </div>
+                    <div class="card-body">
+                        {% if charts.correlation %}
+                        <img src="data:image/png;base64,{{ charts.correlation }}" class="img-fluid" alt="Correlation Heatmap">
+                        {% else %}
+                        <p class="text-muted">No correlation data available</p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Data Tables Section -->
+        <div class="row mb-4">
+            <!-- Device Breakdown -->
+            <div class="col-xl-6">
+                <div class="card shadow mb-4">
+                    <div class="card-header py-3">
+                        <h6 class="m-0 font-weight-bold text-primary">Device Consumption Breakdown</h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-bordered table-sm">
+                                <thead>
+                                    <tr>
+                                        <th>Device Type</th>
+                                        <th>Consumption (W)</th>
+                                        <th>Cost ($)</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for device, consumption in device_consumption.items %}
+                                    <tr>
+                                        <td>{{ device|title }}</td>
+                                        <td>{{ consumption|floatformat:0 }}</td>
+                                        <td>${{ device_costs|default_if_none:device|default:0|floatformat:2 }}</td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Room Breakdown -->
+            <div class="col-xl-6">
+                <div class="card shadow mb-4">
+                    <div class="card-header py-3">
+                        <h6 class="m-0 font-weight-bold text-primary">Room Consumption Breakdown</h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-bordered table-sm">
+                                <thead>
+                                    <tr>
+                                        <th>Room</th>
+                                        <th>Consumption (W)</th>
+                                        <th>Cost ($)</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for room, consumption in room_consumption.items %}
+                                    <tr>
+                                        <td>{{ room|title }}</td>
+                                        <td>{{ consumption|floatformat:0 }}</td>
+                                        <td>${{ room_costs|default_if_none:room|default:0|floatformat:2 }}</td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Recent Data Sample -->
+        {% if recent_data %}
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card shadow mb-4">
+                    <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                        <h6 class="m-0 font-weight-bold text-primary">Recent Energy Data Sample</h6>
+                        <a href="{% url 'energy_analysis:data_list' %}" class="btn btn-sm btn-primary">View All Data</a>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-bordered table-sm">
+                                <thead>
+                                    <tr>
+                                        <th>Timestamp</th>
+                                        <th>Device Type</th>
+                                        <th>Room</th>
+                                        <th>Power (W)</th>
+                                        <th>Status</th>
+                                        <th>User Present</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for data in recent_data|slice:":10" %}
+                                    <tr>
+                                        <td>{{ data.timestamp|date:"M d H:i" }}</td>
+                                        <td>{{ data.device_type|title }}</td>
+                                        <td>{{ data.room|title }}</td>
+                                        <td>{{ data.power_watt|floatformat:1 }}</td>
+                                        <td>
+                                            <span class="badge {% if data.status == 'on' or data.status == 1 or data.status == True %}badge-success{% else %}badge-secondary{% endif %}">
+                                                {% if data.status == 'on' or data.status == 1 or data.status == True %}ON{% else %}OFF{% endif %}
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <span class="badge {% if data.user_present %}badge-info{% else %}badge-light{% endif %}">
+                                                {% if data.user_present %}Yes{% else %}No{% endif %}
+                                            </span>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Quick Actions -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card shadow">
+                    <div class="card-header py-3">
+                        <h6 class="m-0 font-weight-bold text-primary">
+                            <i class="fas fa-tools"></i> Quick Actions & Tools
+                        </h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-3 mb-3">
+                                <a href="{% url 'energy_analysis:visualization' %}" class="btn btn-primary btn-block">
+                                    <i class="fas fa-chart-line"></i> Advanced Visualizations
+                                </a>
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                <a href="{% url 'energy_analysis:utility_monitor' %}" class="btn btn-success btn-block">
+                                    <i class="fas fa-chart-area"></i> Detailed Monitoring
+                                </a>
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                <a href="{% url 'energy_analysis:predict' %}" class="btn btn-info btn-block">
+                                    <i class="fas fa-calculator"></i> Predict Consumption
+                                </a>
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                <a href="{% url 'energy_analysis:train_model' %}" class="btn btn-warning btn-block">
+                                    <i class="fas fa-brain"></i> Train AI Models
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Performance Summary -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="alert alert-info">
+                    <h6><i class="fas fa-info-circle"></i> Dashboard Summary</h6>
+                    <p class="mb-0">
+                        <strong>Data Coverage:</strong> {{ data_points|floatformat:0 }} records from {{ date_range }} |
+                        <strong>Monitoring:</strong> {{ total_devices }} device types across {{ unique_rooms }} rooms |
+                        <strong>Total Analysis:</strong> ${{ total_cost|floatformat:2 }} energy costs with {{ efficiency_ratio|floatformat:1 }}% efficiency score
+                    </p>
+                </div>
+            </div>
+        </div>
+    {% endif %}
+</div>
+
+<style>
+.card {
+    border-radius: 0.5rem;
+    box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15);
+}
+
+.border-left-primary {
+    border-left: 0.25rem solid #4e73df !important;
+}
+
+.border-left-success {
+    border-left: 0.25rem solid #1cc88a !important;
+}
+
+.border-left-info {
+    border-left: 0.25rem solid #36b9cc !important;
+}
+
+.border-left-warning {
+    border-left: 0.25rem solid #f6c23e !important;
+}
+
+.img-fluid {
+    max-width: 100%;
+    height: auto;
+}
+
+.table-sm th,
+.table-sm td {
+    padding: 0.3rem;
+}
+
+.badge-success {
+    background-color: #1cc88a;
+}
+
+.badge-secondary {
+    background-color: #858796;
+}
+
+.badge-info {
+    background-color: #36b9cc;
+}
+
+.badge-light {
+    background-color: #f8f9fc;
+    color: #5a5c69;
+}
+</style>
+{% endblock %} 

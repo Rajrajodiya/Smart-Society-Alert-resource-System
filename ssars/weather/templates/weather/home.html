@@ -1,0 +1,213 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <h2 class="mb-4"><i class="bi bi-cloud-sun"></i> Weather Information</h2>
+        
+        <!-- Search Form -->
+        <div class="card mb-4">
+            <div class="card-body">
+                <form method="get" class="row g-3">
+                    <div class="col-md-8">
+                        <input type="text" name="city" class="form-control form-control-lg" 
+                               placeholder="Enter city name (e.g., Surat, Mumbai, Delhi)" 
+                               value="{{ search_city }}">
+                    </div>
+                    <div class="col-md-4">
+                        <button class="btn btn-primary btn-lg w-100" type="submit">
+                            <i class="bi bi-search"></i> Search Weather
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Current Weather Display -->
+        {% if current_weather %}
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card border-0 shadow-lg">
+                    <div class="card-header bg-primary text-white">
+                        <h5 class="mb-0">
+                            <i class="bi bi-geo-alt"></i> Current Weather - {{ current_weather.city }}, {{ current_weather.country }}
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row align-items-center">
+                            <div class="col-md-3 text-center">
+                                <div class="display-3 fw-bold text-primary">{{ current_weather.temp|floatformat:1 }}°C</div>
+                                <p class="text-muted">Feels like {{ current_weather.feels_like|floatformat:1 }}°C</p>
+                                <div class="h6 text-capitalize">{{ current_weather.weather_description }}</div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="row text-center">
+                                    <div class="col-6 mb-3">
+                                        <div class="h4 text-info mb-0">{{ current_weather.humidity }}%</div>
+                                        <small class="text-muted">Humidity</small>
+                                    </div>
+                                    <div class="col-6 mb-3">
+                                        <div class="h4 text-warning mb-0">{{ current_weather.pressure }} hPa</div>
+                                        <small class="text-muted">Pressure</small>
+                                    </div>
+                                    <div class="col-6">
+                                        <div class="h4 text-secondary mb-0">{{ current_weather.wind_speed|floatformat:1 }} m/s</div>
+                                        <small class="text-muted">Wind Speed</small>
+                                    </div>
+                                    <div class="col-6">
+                                        <div class="h4 text-info mb-0">{{ current_weather.visibility|floatformat:1 }} km</div>
+                                        <small class="text-muted">Visibility</small>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="row text-center">
+                                    <div class="col-6 mb-3">
+                                        <div class="h5 text-success mb-0">{{ current_weather.temp_min|floatformat:1 }}°C</div>
+                                        <small class="text-muted">Min Temp</small>
+                                    </div>
+                                    <div class="col-6 mb-3">
+                                        <div class="h5 text-danger mb-0">{{ current_weather.temp_max|floatformat:1 }}°C</div>
+                                        <small class="text-muted">Max Temp</small>
+                                    </div>
+                                    <div class="col-6">
+                                        <div class="h5 text-primary mb-0">{{ current_weather.wind_deg|floatformat:0 }}°</div>
+                                        <small class="text-muted">Wind Direction</small>
+                                    </div>
+                                    <div class="col-6">
+                                        <div class="h5 text-muted mb-0">{{ current_weather.dt|date:"H:i" }}</div>
+                                        <small class="text-muted">Updated</small>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-3 text-center">
+                                <div class="mb-3">
+                                    <i class="bi bi-sunrise text-warning" style="font-size: 2rem;"></i>
+                                    <div class="small text-muted">Sunrise: {{ current_weather.sunrise|date:"H:i" }}</div>
+                                </div>
+                                <div>
+                                    <i class="bi bi-sunset text-warning" style="font-size: 2rem;"></i>
+                                    <div class="small text-muted">Sunset: {{ current_weather.sunset|date:"H:i" }}</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- 5-Day Forecast -->
+        {% if forecast_data %}
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card border-0 shadow-lg">
+                    <div class="card-header bg-info text-white">
+                        <h5 class="mb-0"><i class="bi bi-calendar-week"></i> 5-Day Weather Forecast</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            {% for forecast in forecast_data|slice:":40" %}
+                            {% if forloop.counter0|divisibleby:8 %}
+                            <div class="col-md-2 mb-3">
+                                <div class="text-center p-3 border rounded">
+                                    <div class="fw-bold text-primary">{{ forecast.dt|date:"D" }}</div>
+                                    <div class="small text-muted">{{ forecast.dt|date:"M d" }}</div>
+                                    <div class="h5 mb-1">{{ forecast.temp|floatformat:1 }}°C</div>
+                                    <div class="small text-capitalize">{{ forecast.weather_description }}</div>
+                                    <div class="small text-muted">
+                                        <i class="bi bi-droplet"></i> {{ forecast.humidity }}%
+                                    </div>
+                                    <div class="small text-muted">
+                                        <i class="bi bi-wind"></i> {{ forecast.wind_speed|floatformat:1 }} m/s
+                                    </div>
+                                </div>
+                            </div>
+                            {% endif %}
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Historical Weather Data -->
+        <div class="row">
+            <div class="col-md-8">
+                <div class="card border-0 shadow-lg">
+                    <div class="card-header bg-secondary text-white">
+                        <h5 class="mb-0"><i class="bi bi-clock-history"></i> Latest Weather Records</h5>
+                    </div>
+                    <div class="card-body">
+                        {% if weather_data %}
+                            <div class="table-responsive">
+                                <table class="table table-striped table-hover">
+                                    <thead class="table-dark">
+                                        <tr>
+                                            <th>Date/Time</th>
+                                            <th>City</th>
+                                            <th>Temperature (°C)</th>
+                                            <th>Humidity (%)</th>
+                                            <th>Pressure (hPa)</th>
+                                            <th>Wind Speed (m/s)</th>
+                                            <th>Visibility (km)</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for data in weather_data %}
+                                        <tr>
+                                            <td>{{ data.dt_txt|date:"M d, Y H:i" }}</td>
+                                            <td>{{ data.city }}</td>
+                                            <td>
+                                                <span class="badge bg-primary">{{ data.temp|floatformat:1 }}°C</span>
+                                            </td>
+                                            <td>
+                                                <span class="badge bg-info text-dark">{{ data.humidity|floatformat:1 }}%</span>
+                                            </td>
+                                            <td>{{ data.pressure }}</td>
+                                            <td>{{ data.speed|floatformat:1 }}</td>
+                                            <td>{{ data.visibility|floatformat:1 }}</td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        {% else %}
+                            <div class="text-center py-4">
+                                <i class="bi bi-cloud-slash text-muted" style="font-size: 3rem;"></i>
+                                <p class="text-muted mt-2">No weather data available.</p>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card border-0 shadow-lg">
+                    <div class="card-header bg-success text-white">
+                        <h5 class="mb-0"><i class="bi bi-speedometer2"></i> Quick Actions</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="d-grid gap-3">
+                            <a href="{% url 'weather_predict' %}" class="btn btn-primary">
+                                <i class="bi bi-graph-up"></i> Weather Prediction
+                            </a>
+                            <a href="{% url 'weather_visualize' %}" class="btn btn-info">
+                                <i class="bi bi-bar-chart"></i> Data Visualization
+                            </a>
+                            <a href="{% url 'weather_alerts' %}" class="btn btn-warning">
+                                <i class="bi bi-exclamation-triangle"></i> Weather Alerts
+                            </a>
+                        </div>
+                        <hr>
+                        <div class="text-center">
+                            <h6 class="text-muted">Total Records</h6>
+                            <h3 class="text-primary fw-bold">{{ total_records }}</h3>
+                            <p class="text-muted small">Weather data points</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

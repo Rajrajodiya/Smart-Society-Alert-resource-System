@@ -1,0 +1,229 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-12">
+        <div class="card border-0 shadow-lg">
+            <div class="card-header bg-primary text-white">
+                <h3 class="mb-0"><i class="bi bi-graph-up"></i> Enhanced Weather Prediction with Historical Analysis</h3>
+            </div>
+            <div class="card-body">
+                <!-- Error Message -->
+                {% if error_message %}
+                <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                    <i class="bi bi-exclamation-triangle"></i> {{ error_message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+                {% endif %}
+                
+                <div class="row">
+                    <div class="col-md-4">
+                        <form method="post">
+                            {% csrf_token %}
+                            <h5 class="text-primary mb-3">Prediction Parameters</h5>
+                            
+                            <div class="mb-3">
+                                <label for="city" class="form-label fw-bold">City Name</label>
+                                <input type="text" class="form-control" id="city" name="city" 
+                                       placeholder="Enter city name (e.g., Surat, Mumbai)"
+                                       value="{{ form_data.city|default:'' }}" required>
+                                <div class="form-text">Enter the city for weather prediction</div>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="temp" class="form-label fw-bold">Current Temperature (°C)</label>
+                                <input type="number" step="0.1" class="form-control" id="temp" name="temp" 
+                                       placeholder="Enter current temperature"
+                                       value="{{ form_data.temp|default:'25' }}" required>
+                                <div class="form-text">Enter the current temperature in Celsius (-50 to 60°C)</div>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="humidity" class="form-label fw-bold">Current Humidity (%)</label>
+                                <input type="number" step="0.1" class="form-control" id="humidity" name="humidity" 
+                                       placeholder="Enter current humidity"
+                                       value="{{ form_data.humidity|default:'60' }}" required>
+                                <div class="form-text">Enter the current humidity percentage (0 to 100%)</div>
+                            </div>
+                            
+                            <h5 class="text-primary mb-3 mt-4">Historical Analysis (Optional)</h5>
+                            
+                            <div class="mb-3">
+                                <label for="start_date" class="form-label fw-bold">Start Date</label>
+                                <input type="date" class="form-control" id="start_date" name="start_date" 
+                                       value="{{ form_data.start_date|default:'' }}">
+                                <div class="form-text">Select start date for historical analysis</div>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="end_date" class="form-label fw-bold">End Date</label>
+                                <input type="date" class="form-control" id="end_date" name="end_date" 
+                                       value="{{ form_data.end_date|default:'' }}">
+                                <div class="form-text">Select end date for historical analysis</div>
+                            </div>
+                            
+                            <div class="d-grid">
+                                <button type="submit" class="btn btn-primary btn-lg">
+                                    <i class="bi bi-calculator"></i> Predict & Analyze Weather
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                    
+                    <div class="col-md-8">
+                        {% if prediction %}
+                        <div class="row">
+                            <div class="col-12">
+                                <h5 class="text-success mb-3">
+                                    <i class="bi bi-check-circle"></i> Prediction Results for {{ prediction.city }}
+                                </h5>
+                                
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="card bg-light">
+                                            <div class="card-body">
+                                                <h6 class="card-title text-primary">Predicted Weather Parameters</h6>
+                                                <div class="row">
+                                                    <div class="col-6">
+                                                        <p><strong>Temperature:</strong><br>
+                                                        <span class="h4 text-danger">{{ prediction.predicted_temp }}°C</span></p>
+                                                    </div>
+                                                    <div class="col-6">
+                                                        <p><strong>Humidity:</strong><br>
+                                                        <span class="h4 text-info">{{ prediction.predicted_humidity }}%</span></p>
+                                                    </div>
+                                                    <div class="col-6">
+                                                        <p><strong>Pressure:</strong><br>
+                                                        <span class="h4 text-success">{{ prediction.predicted_pressure }} hPa</span></p>
+                                                    </div>
+                                                    <div class="col-6">
+                                                        <p><strong>Visibility:</strong><br>
+                                                        <span class="h4 text-warning">{{ prediction.predicted_visibility }} km</span></p>
+                                                    </div>
+                                                </div>
+                                                <p><strong>Weather Type:</strong> 
+                                                <span class="badge bg-primary">{{ prediction.weather_type }}</span></p>
+                                                <p><small class="text-muted">Prediction made on: {{ prediction.dt|date:"M d, Y H:i" }}</small></p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="col-md-6">
+                                        <div class="card bg-light">
+                                            <div class="card-body">
+                                                <h6 class="card-title text-primary">Input Parameters</h6>
+                                                <p><strong>Input Temperature:</strong> {{ prediction.input_temp }}°C</p>
+                                                <p><strong>Input Humidity:</strong> {{ prediction.input_humidity }}%</p>
+                                                <p><strong>City:</strong> {{ prediction.city }}</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {% endif %}
+                        
+                        {% if historical_data %}
+                        <div class="row mt-4">
+                            <div class="col-12">
+                                <h5 class="text-info mb-3">
+                                    <i class="bi bi-clock-history"></i> Historical Analysis ({{ historical_data.start_date }} to {{ historical_data.end_date }})
+                                </h5>
+                                
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="card border-info">
+                                            <div class="card-body">
+                                                <h6 class="card-title">Temperature Statistics</h6>
+                                                <p><strong>Average:</strong> {{ historical_data.avg_temp }}°C</p>
+                                                <p><strong>Maximum:</strong> {{ historical_data.max_temp }}°C</p>
+                                                <p><strong>Minimum:</strong> {{ historical_data.min_temp }}°C</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="col-md-6">
+                                        <div class="card border-info">
+                                            <div class="card-body">
+                                                <h6 class="card-title">Other Parameters</h6>
+                                                <p><strong>Avg Humidity:</strong> {{ historical_data.avg_humidity }}%</p>
+                                                <p><strong>Avg Pressure:</strong> {{ historical_data.avg_pressure }} hPa</p>
+                                                <p><strong>Dominant Weather:</strong> {{ historical_data.dominant_weather }}</p>
+                                                <p><strong>Total Records:</strong> {{ historical_data.total_records }}</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {% endif %}
+                        
+                        {% if weather_trends %}
+                        <div class="row mt-4">
+                            <div class="col-12">
+                                <h5 class="text-warning mb-3">
+                                    <i class="bi bi-trending-up"></i> Weather Trends Analysis
+                                </h5>
+                                
+                                <div class="card border-warning">
+                                    <div class="card-body">
+                                        <p><strong>Temperature Trend:</strong> 
+                                        <span class="badge {% if weather_trends.temperature_trend == 'increasing' %}bg-danger{% else %}bg-primary{% endif %}">
+                                            {{ weather_trends.temperature_trend|title }}
+                                        </span></p>
+                                        <p><strong>Temperature Change:</strong> {{ weather_trends.temp_change }}°C</p>
+                                        <p><strong>Prediction Accuracy:</strong> {{ weather_trends.prediction_accuracy }}%</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                {% if prediction_chart %}
+                <div class="row mt-4">
+                    <div class="col-12">
+                        <h5 class="text-dark mb-3">
+                            <i class="bi bi-bar-chart"></i> Weather Visualization & Trends
+                        </h5>
+                        <div class="text-center">
+                            <img src="data:image/png;base64,{{ prediction_chart }}" 
+                                 class="img-fluid border rounded shadow" 
+                                 alt="Weather Prediction Chart"
+                                 style="max-width: 100%; height: auto;">
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+                
+                {% if not prediction %}
+                <div class="col-md-8">
+                    <div class="alert alert-info">
+                        <h5><i class="bi bi-info-circle"></i> How to Use Enhanced Weather Prediction</h5>
+                        <ul>
+                            <li><strong>Basic Prediction:</strong> Enter city, temperature, and humidity for instant weather parameter prediction</li>
+                            <li><strong>Historical Analysis:</strong> Add date range to analyze historical weather patterns</li>
+                            <li><strong>Trend Analysis:</strong> View temperature trends and prediction accuracy</li>
+                            <li><strong>Visualization:</strong> Get comprehensive charts showing weather patterns over time</li>
+                        </ul>
+                        <p class="mb-0"><strong>Data Source:</strong> Analysis is based on weather_data.csv containing {{ "895,492"|add:"0" }} weather records</p>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.card {
+    transition: transform 0.2s;
+}
+.card:hover {
+    transform: translateY(-2px);
+}
+.badge {
+    font-size: 0.9em;
+}
+</style>
+{% endblock %} 

@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container mt-4">
+    <h2 class="mb-4 text-primary text-center">📰 Latest News</h2>
+    <div class="row g-4">
+        {% for i in newss %}
+        <div class="col-md-6 col-lg-4">
+            <div class="card h-100 border-0 shadow-lg rounded-4">
+                {% if i.imageURL %}
+                <img src="{{ i.imageURL }}" class="card-img-top rounded-top-4" alt="News image" style="height:180px;object-fit:cover;">
+                {% else %}
+                <div class="bg-light d-flex align-items-center justify-content-center" style="height:180px;">
+                    <span class="text-secondary">No Image</span>
+                </div>
+                {% endif %}
+                <div class="card-body">
+                    <h5 class="card-title fw-bold">{{ i.headline }}</h5>
+                    <h6 class="card-subtitle mb-2 text-muted">{{ i.date }}</h6>
+                    <p class="card-text">{{ i.body|truncatewords:30 }}</p>
+                    {% if i.url %}
+                    <a href="{{ i.url }}" class="btn btn-outline-primary btn-sm" target="_blank">Read More</a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <div class="col-12">
+            <div class="alert alert-info text-center">No news available.</div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

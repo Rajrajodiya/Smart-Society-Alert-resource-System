@@ -1,0 +1,344 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container-fluid">
+    {% if has_data %}
+        <!-- Header -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <h1 class="h3 mb-0 text-gray-800">
+                    <i class="fas fa-chart-line text-primary"></i> Weather Data Analysis
+                </h1>
+                <p class="text-muted">Comprehensive analysis of weather patterns and statistics</p>
+            </div>
+        </div>
+
+        <!-- Summary Statistics -->
+        <div class="row mb-4">
+            <div class="col-xl-3 col-md-6 mb-4">
+                <div class="card border-left-primary shadow h-100 py-2">
+                    <div class="card-body">
+                        <div class="row no-gutters align-items-center">
+                            <div class="col mr-2">
+                                <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
+                                    Total Records</div>
+                                <div class="h5 mb-0 font-weight-bold text-gray-800">{{ total_records }}</div>
+                            </div>
+                            <div class="col-auto">
+                                <i class="fas fa-database fa-2x text-gray-300"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-xl-3 col-md-6 mb-4">
+                <div class="card border-left-success shadow h-100 py-2">
+                    <div class="card-body">
+                        <div class="row no-gutters align-items-center">
+                            <div class="col mr-2">
+                                <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
+                                    Avg Temperature</div>
+                                <div class="h5 mb-0 font-weight-bold text-gray-800">{{ analysis_results.temperature_analysis.mean }}°C</div>
+                            </div>
+                            <div class="col-auto">
+                                <i class="fas fa-thermometer-half fa-2x text-gray-300"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-xl-3 col-md-6 mb-4">
+                <div class="card border-left-info shadow h-100 py-2">
+                    <div class="card-body">
+                        <div class="row no-gutters align-items-center">
+                            <div class="col mr-2">
+                                <div class="text-xs font-weight-bold text-info text-uppercase mb-1">
+                                    Avg Humidity</div>
+                                <div class="h5 mb-0 font-weight-bold text-gray-800">{{ analysis_results.humidity_analysis.mean }}%</div>
+                            </div>
+                            <div class="col-auto">
+                                <i class="fas fa-tint fa-2x text-gray-300"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-xl-3 col-md-6 mb-4">
+                <div class="card border-left-warning shadow h-100 py-2">
+                    <div class="card-body">
+                        <div class="row no-gutters align-items-center">
+                            <div class="col mr-2">
+                                <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
+                                    Cities Monitored</div>
+                                <div class="h5 mb-0 font-weight-bold text-gray-800">{{ analysis_results.city_analysis|length }}</div>
+                            </div>
+                            <div class="col-auto">
+                                <i class="fas fa-map-marker-alt fa-2x text-gray-300"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Temperature Analysis -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card shadow">
+                    <div class="card-header py-3">
+                        <h6 class="m-0 font-weight-bold text-primary">
+                            <i class="fas fa-thermometer-half"></i> Temperature Analysis
+                        </h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-3">
+                                <div class="text-center">
+                                    <h4 class="text-primary">{{ analysis_results.temperature_analysis.mean }}°C</h4>
+                                    <p class="text-muted">Mean Temperature</p>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="text-center">
+                                    <h4 class="text-success">{{ analysis_results.temperature_analysis.median }}°C</h4>
+                                    <p class="text-muted">Median Temperature</p>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="text-center">
+                                    <h4 class="text-danger">{{ analysis_results.temperature_analysis.max }}°C</h4>
+                                    <p class="text-muted">Maximum Temperature</p>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="text-center">
+                                    <h4 class="text-info">{{ analysis_results.temperature_analysis.min }}°C</h4>
+                                    <p class="text-muted">Minimum Temperature</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row mt-3">
+                            <div class="col-md-6">
+                                <p><strong>Standard Deviation:</strong> {{ analysis_results.temperature_analysis.std }}°C</p>
+                                <p><strong>Temperature Range:</strong> {{ analysis_results.temperature_analysis.range }}°C</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Humidity and Pressure Analysis -->
+        <div class="row mb-4">
+            <div class="col-xl-6">
+                <div class="card shadow mb-4">
+                    <div class="card-header py-3">
+                        <h6 class="m-0 font-weight-bold text-primary">
+                            <i class="fas fa-tint"></i> Humidity Analysis
+                        </h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-4">
+                                <div class="text-center">
+                                    <h4 class="text-info">{{ analysis_results.humidity_analysis.mean }}%</h4>
+                                    <p class="text-muted">Mean Humidity</p>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="text-center">
+                                    <h4 class="text-success">{{ analysis_results.humidity_analysis.max }}%</h4>
+                                    <p class="text-muted">Maximum Humidity</p>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="text-center">
+                                    <h4 class="text-warning">{{ analysis_results.humidity_analysis.min }}%</h4>
+                                    <p class="text-muted">Minimum Humidity</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-xl-6">
+                <div class="card shadow mb-4">
+                    <div class="card-header py-3">
+                        <h6 class="m-0 font-weight-bold text-primary">
+                            <i class="fas fa-tachometer-alt"></i> Pressure Analysis
+                        </h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-4">
+                                <div class="text-center">
+                                    <h4 class="text-warning">{{ analysis_results.pressure_analysis.mean }} hPa</h4>
+                                    <p class="text-muted">Mean Pressure</p>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="text-center">
+                                    <h4 class="text-success">{{ analysis_results.pressure_analysis.max }} hPa</h4>
+                                    <p class="text-muted">Maximum Pressure</p>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="text-center">
+                                    <h4 class="text-danger">{{ analysis_results.pressure_analysis.min }} hPa</h4>
+                                    <p class="text-muted">Minimum Pressure</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Seasonal Analysis -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card shadow">
+                    <div class="card-header py-3">
+                        <h6 class="m-0 font-weight-bold text-primary">
+                            <i class="fas fa-calendar-alt"></i> Seasonal Temperature Analysis
+                        </h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-3">
+                                <div class="text-center">
+                                    <h4 class="text-success">{{ analysis_results.seasonal_analysis.spring }}°C</h4>
+                                    <p class="text-muted">Spring (Mar-May)</p>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="text-center">
+                                    <h4 class="text-danger">{{ analysis_results.seasonal_analysis.summer }}°C</h4>
+                                    <p class="text-muted">Summer (Jun-Aug)</p>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="text-center">
+                                    <h4 class="text-warning">{{ analysis_results.seasonal_analysis.autumn }}°C</h4>
+                                    <p class="text-muted">Autumn (Sep-Nov)</p>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="text-center">
+                                    <h4 class="text-info">{{ analysis_results.seasonal_analysis.winter }}°C</h4>
+                                    <p class="text-muted">Winter (Dec-Feb)</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- City Analysis -->
+        <div class="row mb-4">
+            <div class="col-xl-6">
+                <div class="card shadow mb-4">
+                    <div class="card-header py-3">
+                        <h6 class="m-0 font-weight-bold text-primary">
+                            <i class="fas fa-map-marker-alt"></i> Top Cities by Data Points
+                        </h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-bordered">
+                                <thead>
+                                    <tr>
+                                        <th>City</th>
+                                        <th>Records</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for city, count in analysis_results.city_analysis.items %}
+                                    <tr>
+                                        <td>{{ city }}</td>
+                                        <td>{{ count }}</td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-xl-6">
+                <div class="card shadow mb-4">
+                    <div class="card-header py-3">
+                        <h6 class="m-0 font-weight-bold text-primary">
+                            <i class="fas fa-cloud"></i> Weather Type Distribution
+                        </h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-bordered">
+                                <thead>
+                                    <tr>
+                                        <th>Weather Type</th>
+                                        <th>Count</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for weather_type, count in analysis_results.weather_patterns.items %}
+                                    <tr>
+                                        <td>{{ weather_type|title }}</td>
+                                        <td>{{ count }}</td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card shadow">
+                    <div class="card-header py-3">
+                        <h6 class="m-0 font-weight-bold text-primary">Quick Actions</h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-3 mb-3">
+                                <a href="{% url 'weather' %}" class="btn btn-primary btn-block">
+                                    <i class="fas fa-home"></i> Weather Home
+                                </a>
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                <a href="{% url 'weather_visualize' %}" class="btn btn-success btn-block">
+                                    <i class="fas fa-chart-line"></i> View Charts
+                                </a>
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                <a href="{% url 'weather_predict' %}" class="btn btn-info btn-block">
+                                    <i class="fas fa-calculator"></i> Predict Weather
+                                </a>
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                <a href="{% url 'weather_alerts' %}" class="btn btn-warning btn-block">
+                                    <i class="fas fa-exclamation-triangle"></i> View Alerts
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    {% else %}
+        <div class="alert alert-info" role="alert">
+            <i class="fas fa-info-circle"></i> No weather data available for analysis. Please add some weather data first.
+        </div>
+    {% endif %}
+</div>
+{% endblock %} 

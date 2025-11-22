@@ -1,0 +1,202 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <h2 class="mb-4"><i class="bi bi-exclamation-triangle"></i> Weather Alerts & Warnings</h2>
+        
+        <!-- Current Weather Status -->
+        {% if current_weather %}
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card border-0 shadow-lg">
+                    <div class="card-header bg-warning text-dark">
+                        <h5 class="mb-0"><i class="bi bi-geo-alt"></i> Current Weather Status - {{ current_weather.city }}</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row align-items-center">
+                            <div class="col-md-3 text-center">
+                                <div class="display-4 fw-bold text-primary">{{ current_weather.temp|floatformat:1 }}°C</div>
+                                <p class="text-muted">{{ current_weather.weather_description }}</p>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="row text-center">
+                                    <div class="col-6">
+                                        <div class="h5 text-info mb-0">{{ current_weather.humidity }}%</div>
+                                        <small class="text-muted">Humidity</small>
+                                    </div>
+                                    <div class="col-6">
+                                        <div class="h5 text-warning mb-0">{{ current_weather.visibility|floatformat:1 }} km</div>
+                                        <small class="text-muted">Visibility</small>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="row text-center">
+                                    <div class="col-6">
+                                        <div class="h5 text-secondary mb-0">{{ current_weather.wind_speed|floatformat:1 }} m/s</div>
+                                        <small class="text-muted">Wind Speed</small>
+                                    </div>
+                                    <div class="col-6">
+                                        <div class="h5 text-danger mb-0">{{ current_weather.pressure }} hPa</div>
+                                        <small class="text-muted">Pressure</small>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-3 text-center">
+                                <div class="h6 text-muted">Last Updated</div>
+                                <div class="fw-bold">{{ current_weather.dt|date:"M d, Y H:i" }}</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Alert Categories -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card border-0 shadow-lg">
+                    <div class="card-header bg-danger text-white">
+                        <h5 class="mb-0"><i class="bi bi-shield-exclamation"></i> Active Weather Alerts</h5>
+                    </div>
+                    <div class="card-body">
+                        {% if alerts %}
+                            {% for alert in alerts %}
+                            <div class="alert alert-{% if alert.severity == 'critical' %}danger{% elif alert.severity == 'high' %}warning{% elif alert.severity == 'medium' %}info{% else %}success{% endif %} alert-dismissible fade show" role="alert">
+                                <div class="row align-items-center">
+                                    <div class="col-md-2">
+                                        <div class="text-center">
+                                            {% if alert.alert_type == 'storm' %}
+                                                <i class="bi bi-cloud-lightning-rain text-danger" style="font-size: 2rem;"></i>
+                                            {% elif alert.alert_type == 'rain' %}
+                                                <i class="bi bi-cloud-rain text-info" style="font-size: 2rem;"></i>
+                                            {% elif alert.alert_type == 'heat' %}
+                                                <i class="bi bi-thermometer-sun text-warning" style="font-size: 2rem;"></i>
+                                            {% elif alert.alert_type == 'cold' %}
+                                                <i class="bi bi-thermometer-snowflake text-primary" style="font-size: 2rem;"></i>
+                                            {% elif alert.alert_type == 'fog' %}
+                                                <i class="bi bi-cloud-fog text-secondary" style="font-size: 2rem;"></i>
+                                            {% elif alert.alert_type == 'wind' %}
+                                                <i class="bi bi-wind text-success" style="font-size: 2rem;"></i>
+                                            {% elif alert.alert_type == 'flood' %}
+                                                <i class="bi bi-water text-info" style="font-size: 2rem;"></i>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                    <div class="col-md-7">
+                                        <h6 class="fw-bold mb-1">{{ alert.title }}</h6>
+                                        <p class="mb-1">{{ alert.description }}</p>
+                                        <small class="text-muted">
+                                            <i class="bi bi-geo-alt"></i> {{ alert.city }} | 
+                                            <i class="bi bi-clock"></i> {{ alert.start_time|date:"M d, Y H:i" }} - {{ alert.end_time|date:"M d, Y H:i" }}
+                                        </small>
+                                    </div>
+                                    <div class="col-md-2 text-center">
+                                        <span class="badge bg-{% if alert.severity == 'critical' %}danger{% elif alert.severity == 'high' %}warning{% elif alert.severity == 'medium' %}info{% else %}success{% endif %} fs-6">
+                                            {{ alert.severity|title }}
+                                        </span>
+                                    </div>
+                                    <div class="col-md-1">
+                                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        {% else %}
+                            <div class="text-center py-4">
+                                <i class="bi bi-check-circle text-success" style="font-size: 3rem;"></i>
+                                <h5 class="text-success mt-2">No Active Alerts</h5>
+                                <p class="text-muted">All weather conditions are normal at this time.</p>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Alert Statistics -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card border-0 shadow-lg">
+                    <div class="card-header bg-info text-white">
+                        <h5 class="mb-0"><i class="bi bi-bar-chart"></i> Alert Statistics</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row text-center">
+                            <div class="col-md-3">
+                                <div class="p-3 rounded bg-light shadow-sm">
+                                    <h3 class="text-primary fw-bold mb-0">{{ total_alerts }}</h3>
+                                    <p class="mb-0">Total Alerts</p>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="p-3 rounded bg-light shadow-sm">
+                                    <h3 class="text-warning fw-bold mb-0">24/7</h3>
+                                    <p class="mb-0">Monitoring</p>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="p-3 rounded bg-light shadow-sm">
+                                    <h3 class="text-success fw-bold mb-0">Real-time</h3>
+                                    <p class="mb-0">Updates</p>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="p-3 rounded bg-light shadow-sm">
+                                    <h3 class="text-info fw-bold mb-0">Multi-city</h3>
+                                    <p class="mb-0">Coverage</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Alert Types Information -->
+        <div class="row">
+            <div class="col-12">
+                <div class="card border-0 shadow-lg">
+                    <div class="card-header bg-dark text-white">
+                        <h5 class="mb-0"><i class="bi bi-info-circle"></i> Alert Types & Severity Levels</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <h6 class="fw-bold text-primary">Alert Types:</h6>
+                                <ul class="list-unstyled">
+                                    <li><i class="bi bi-cloud-lightning-rain text-danger"></i> <strong>Storm Warning:</strong> Thunderstorms, lightning</li>
+                                    <li><i class="bi bi-cloud-rain text-info"></i> <strong>Heavy Rain:</strong> Excessive rainfall</li>
+                                    <li><i class="bi bi-thermometer-sun text-warning"></i> <strong>Heat Wave:</strong> High temperatures</li>
+                                    <li><i class="bi bi-thermometer-snowflake text-primary"></i> <strong>Cold Wave:</strong> Low temperatures</li>
+                                    <li><i class="bi bi-cloud-fog text-secondary"></i> <strong>Fog Alert:</strong> Reduced visibility</li>
+                                    <li><i class="bi bi-wind text-success"></i> <strong>High Wind:</strong> Strong winds</li>
+                                    <li><i class="bi bi-water text-info"></i> <strong>Flood Warning:</strong> Water levels</li>
+                                </ul>
+                            </div>
+                            <div class="col-md-6">
+                                <h6 class="fw-bold text-info">Severity Levels:</h6>
+                                <ul class="list-unstyled">
+                                    <li><span class="badge bg-success">Low</span> <strong>Minor:</strong> Slight inconvenience</li>
+                                    <li><span class="badge bg-info">Medium</span> <strong>Moderate:</strong> Caution advised</li>
+                                    <li><span class="badge bg-warning">High</span> <strong>Significant:</strong> Take precautions</li>
+                                    <li><span class="badge bg-danger">Critical</span> <strong>Severe:</strong> Immediate action required</li>
+                                </ul>
+                                <hr>
+                                <h6 class="fw-bold text-warning">Safety Tips:</h6>
+                                <ul class="list-unstyled small">
+                                    <li><i class="bi bi-check-circle text-success"></i> Stay informed about weather updates</li>
+                                    <li><i class="bi bi-check-circle text-success"></i> Follow local authority instructions</li>
+                                    <li><i class="bi bi-check-circle text-success"></i> Prepare emergency supplies</li>
+                                    <li><i class="bi bi-check-circle text-success"></i> Avoid unnecessary travel during severe weather</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

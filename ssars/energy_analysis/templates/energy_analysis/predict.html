@@ -1,0 +1,289 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Energy Prediction{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <h1 class="h3 mb-0 text-gray-800">
+                <i class="fas fa-calculator text-info"></i> Energy Consumption Prediction
+            </h1>
+            <p class="text-muted">Predict energy consumption based on environmental and device parameters</p>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Prediction Form -->
+        <div class="col-xl-8">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">
+                        <i class="fas fa-edit"></i> Input Parameters
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <form method="POST">
+                        {% csrf_token %}
+                        <div class="row">
+                            <!-- Environmental Parameters -->
+                            <div class="col-md-6">
+                                <h6 class="text-primary">Environmental Parameters</h6>
+                                
+                                <div class="mb-3">
+                                    <label for="{{ form.indoor_temp.id_for_label }}" class="form-label">
+                                        {{ form.indoor_temp.label }}
+                                    </label>
+                                    {{ form.indoor_temp }}
+                                    {% if form.indoor_temp.errors %}
+                                        <div class="text-danger">{{ form.indoor_temp.errors }}</div>
+                                    {% endif %}
+                                </div>
+
+                                <div class="mb-3">
+                                    <label for="{{ form.outdoor_temp.id_for_label }}" class="form-label">
+                                        {{ form.outdoor_temp.label }}
+                                    </label>
+                                    {{ form.outdoor_temp }}
+                                    {% if form.outdoor_temp.errors %}
+                                        <div class="text-danger">{{ form.outdoor_temp.errors }}</div>
+                                    {% endif %}
+                                </div>
+
+                                <div class="mb-3">
+                                    <label for="{{ form.humidity.id_for_label }}" class="form-label">
+                                        {{ form.humidity.label }}
+                                    </label>
+                                    {{ form.humidity }}
+                                    {% if form.humidity.errors %}
+                                        <div class="text-danger">{{ form.humidity.errors }}</div>
+                                    {% endif %}
+                                </div>
+
+                                <div class="mb-3">
+                                    <label for="{{ form.light_level.id_for_label }}" class="form-label">
+                                        {{ form.light_level.label }}
+                                    </label>
+                                    {{ form.light_level }}
+                                    {% if form.light_level.errors %}
+                                        <div class="text-danger">{{ form.light_level.errors }}</div>
+                                    {% endif %}
+                                </div>
+                            </div>
+
+                            <!-- Time and Device Parameters -->
+                            <div class="col-md-6">
+                                <h6 class="text-primary">Time and Device Parameters</h6>
+                                
+                                <div class="mb-3">
+                                    <label for="{{ form.hour_of_day.id_for_label }}" class="form-label">
+                                        {{ form.hour_of_day.label }}
+                                    </label>
+                                    {{ form.hour_of_day }}
+                                    {% if form.hour_of_day.errors %}
+                                        <div class="text-danger">{{ form.hour_of_day.errors }}</div>
+                                    {% endif %}
+                                </div>
+
+                                <div class="mb-3">
+                                    <label for="{{ form.day_of_week.id_for_label }}" class="form-label">
+                                        {{ form.day_of_week.label }}
+                                    </label>
+                                    {{ form.day_of_week }}
+                                    {% if form.day_of_week.errors %}
+                                        <div class="text-danger">{{ form.day_of_week.errors }}</div>
+                                    {% endif %}
+                                </div>
+
+                                <div class="mb-3">
+                                    <label for="{{ form.device_type.id_for_label }}" class="form-label">
+                                        {{ form.device_type.label }}
+                                    </label>
+                                    {{ form.device_type }}
+                                    {% if form.device_type.errors %}
+                                        <div class="text-danger">{{ form.device_type.errors }}</div>
+                                    {% endif %}
+                                </div>
+
+                                <div class="mb-3">
+                                    <label for="{{ form.room.id_for_label }}" class="form-label">
+                                        {{ form.room.label }}
+                                    </label>
+                                    {{ form.room }}
+                                    {% if form.room.errors %}
+                                        <div class="text-danger">{{ form.room.errors }}</div>
+                                    {% endif %}
+                                </div>
+
+                                <div class="mb-3">
+                                    <label for="{{ form.price_kwh.id_for_label }}" class="form-label">
+                                        {{ form.price_kwh.label }}
+                                    </label>
+                                    {{ form.price_kwh }}
+                                    {% if form.price_kwh.errors %}
+                                        <div class="text-danger">{{ form.price_kwh.errors }}</div>
+                                    {% endif %}
+                                </div>
+
+                                <div class="mb-3">
+                                    <div class="form-check">
+                                        {{ form.user_present }}
+                                        <label class="form-check-label" for="{{ form.user_present.id_for_label }}">
+                                            {{ form.user_present.label }}
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="text-center">
+                            <button type="submit" class="btn btn-primary btn-lg">
+                                <i class="fas fa-calculator"></i> Predict Energy Consumption
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Prediction Results -->
+        <div class="col-xl-4">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">
+                        <i class="fas fa-chart-bar"></i> Prediction Results
+                    </h6>
+                </div>
+                <div class="card-body">
+                    {% if prediction_result %}
+                        <div class="text-center mb-4">
+                            <div class="h1 text-success">{{ prediction_result|floatformat:2 }}</div>
+                            <p class="text-muted">Watts</p>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-6">
+                                <div class="text-center">
+                                    <div class="h4 text-info">{{ prediction_kwh|floatformat:3 }}</div>
+                                    <small class="text-muted">kWh</small>
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="text-center">
+                                    <div class="h4 text-warning">${{ prediction_cost|floatformat:4 }}</div>
+                                    <small class="text-muted">Cost per hour</small>
+                                </div>
+                            </div>
+                        </div>
+
+                        <hr>
+
+                        <h6>Efficiency Rating:</h6>
+                        <div class="progress mb-3">
+                            {% if prediction_result < 100 %}
+                                <div class="progress-bar bg-success" style="width: 25%">Excellent</div>
+                            {% elif prediction_result < 200 %}
+                                <div class="progress-bar bg-info" style="width: 50%">Good</div>
+                            {% elif prediction_result < 300 %}
+                                <div class="progress-bar bg-warning" style="width: 75%">Moderate</div>
+                            {% else %}
+                                <div class="progress-bar bg-danger" style="width: 100%">High</div>
+                            {% endif %}
+                        </div>
+
+                        <div class="alert alert-info">
+                            <i class="fas fa-lightbulb"></i>
+                            <strong>Tip:</strong> 
+                            {% if prediction_result < 100 %}
+                                Excellent energy efficiency! Keep up the good work.
+                            {% elif prediction_result < 200 %}
+                                Good efficiency. Consider optimizing settings for better results.
+                            {% elif prediction_result < 300 %}
+                                Moderate consumption. Look for ways to reduce energy usage.
+                            {% else %}
+                                High consumption detected. Consider energy-saving measures.
+                            {% endif %}
+                        </div>
+                    {% else %}
+                        <div class="text-center">
+                            <i class="fas fa-calculator fa-3x text-muted mb-3"></i>
+                            <p class="text-muted">Enter parameters and click predict to see results</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Model Information -->
+            {% if model_info %}
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">
+                        <i class="fas fa-brain"></i> Model Information
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-6">
+                            <small class="text-muted">Model Type</small>
+                            <div class="font-weight-bold">{{ model_info.type|title }}</div>
+                        </div>
+                        <div class="col-6">
+                            <small class="text-muted">Accuracy (R²)</small>
+                            <div class="font-weight-bold">{{ model_info.accuracy|floatformat:3 }}</div>
+                        </div>
+                    </div>
+                    <hr>
+                    <div class="row">
+                        <div class="col-6">
+                            <small class="text-muted">MSE</small>
+                            <div class="font-weight-bold">{{ model_info.mse|floatformat:2 }}</div>
+                        </div>
+                        <div class="col-6">
+                            <small class="text-muted">MAE</small>
+                            <div class="font-weight-bold">{{ model_info.mae|floatformat:2 }}</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card shadow">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">Quick Actions</h6>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-3 mb-3">
+                            <a href="{% url 'energy_analysis:dashboard' %}" class="btn btn-primary btn-block">
+                                <i class="fas fa-tachometer-alt"></i> Dashboard
+                            </a>
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <a href="{% url 'energy_analysis:visualization' %}" class="btn btn-success btn-block">
+                                <i class="fas fa-chart-line"></i> View Charts
+                            </a>
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <a href="{% url 'energy_analysis:train_model' %}" class="btn btn-info btn-block">
+                                <i class="fas fa-brain"></i> Train Model
+                            </a>
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <a href="{% url 'energy_analysis:utility_monitor' %}" class="btn btn-warning btn-block">
+                                <i class="fas fa-tachometer-alt"></i> Utility Monitor
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

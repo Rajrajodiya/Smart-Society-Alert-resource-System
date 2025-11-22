@@ -1,0 +1,258 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Train Energy Model{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <h1 class="h3 mb-0 text-gray-800">
+                <i class="fas fa-brain text-success"></i> Train Energy Prediction Model
+            </h1>
+            <p class="text-muted">Train machine learning models to predict energy consumption</p>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Training Form -->
+        <div class="col-xl-8">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">
+                        <i class="fas fa-cogs"></i> Model Training Configuration
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <form method="POST">
+                        {% csrf_token %}
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="model_type" class="form-label">Model Type</label>
+                                    <select name="model_type" id="model_type" class="form-select" required>
+                                        <option value="random_forest">Random Forest</option>
+                                        <option value="linear_regression">Linear Regression</option>
+                                    </select>
+                                    <small class="text-muted">
+                                        Choose the machine learning algorithm for training
+                                    </small>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="test_size" class="form-label">Test Size</label>
+                                    <input type="number" name="test_size" id="test_size" class="form-control" 
+                                           value="0.2" step="0.1" min="0.1" max="0.5" required>
+                                    <small class="text-muted">
+                                        Percentage of data to use for testing (0.1 - 0.5)
+                                    </small>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="random_state" class="form-label">Random State</label>
+                                    <input type="number" name="random_state" id="random_state" class="form-control" 
+                                           value="42" min="0" required>
+                                    <small class="text-muted">
+                                        Seed for reproducible results
+                                    </small>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">Data Source</label>
+                                    <div class="form-control-plaintext">
+                                        Smart Home Energy Consumption Optimization.csv
+                                    </div>
+                                    <small class="text-muted">
+                                        Using static CSV data for training
+                                    </small>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="text-center">
+                            <button type="submit" class="btn btn-success btn-lg">
+                                <i class="fas fa-play"></i> Start Training
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Model Information -->
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">
+                        <i class="fas fa-info-circle"></i> Model Information
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6>Random Forest</h6>
+                            <ul class="list-unstyled">
+                                <li><i class="fas fa-check text-success"></i> Handles non-linear relationships</li>
+                                <li><i class="fas fa-check text-success"></i> Robust to outliers</li>
+                                <li><i class="fas fa-check text-success"></i> Provides feature importance</li>
+                                <li><i class="fas fa-times text-danger"></i> Can be slower for large datasets</li>
+                            </ul>
+                        </div>
+                        <div class="col-md-6">
+                            <h6>Linear Regression</h6>
+                            <ul class="list-unstyled">
+                                <li><i class="fas fa-check text-success"></i> Fast and interpretable</li>
+                                <li><i class="fas fa-check text-success"></i> Works well with linear relationships</li>
+                                <li><i class="fas fa-times text-danger"></i> Assumes linear relationships</li>
+                                <li><i class="fas fa-times text-danger"></i> Sensitive to outliers</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <hr>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6>Training Process</h6>
+                            <ul class="list-unstyled">
+                                <li><i class="fas fa-arrow-right text-primary"></i> Load and preprocess data</li>
+                                <li><i class="fas fa-arrow-right text-primary"></i> Split into train/test sets</li>
+                                <li><i class="fas fa-arrow-right text-primary"></i> Train the selected model</li>
+                                <li><i class="fas fa-arrow-right text-primary"></i> Evaluate performance metrics</li>
+                            </ul>
+                        </div>
+                        <div class="col-md-6">
+                            <h6>Model Benefits</h6>
+                            <ul class="list-unstyled">
+                                <li><i class="fas fa-check text-success"></i> Automated feature selection</li>
+                                <li><i class="fas fa-check text-success"></i> Cross-validation scoring</li>
+                                <li><i class="fas fa-check text-success"></i> Comprehensive metrics</li>
+                                <li><i class="fas fa-check text-success"></i> Production-ready models</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Training Status -->
+        <div class="col-xl-4">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">
+                        <i class="fas fa-chart-line"></i> Training Status
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="text-center mb-4">
+                        <i class="fas fa-cogs fa-3x text-muted"></i>
+                        <p class="text-muted mt-2">Ready to train model</p>
+                    </div>
+
+                    <div class="progress mb-3" style="display: none;">
+                        <div class="progress-bar progress-bar-striped progress-bar-animated" 
+                             role="progressbar" style="width: 0%"></div>
+                    </div>
+
+                    <div class="alert alert-info">
+                        <i class="fas fa-lightbulb"></i>
+                        <strong>Tip:</strong> Random Forest is recommended for energy consumption prediction as it handles non-linear relationships well.
+                    </div>
+
+                    <div class="alert alert-warning">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        <strong>Note:</strong> Training may take a few moments depending on the dataset size and model complexity.
+                    </div>
+                </div>
+            </div>
+
+            <!-- Model Performance -->
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">
+                        <i class="fas fa-trophy"></i> Expected Performance
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="row text-center">
+                        <div class="col-6">
+                            <div class="h4 text-success">0.85+</div>
+                            <small class="text-muted">R² Score</small>
+                        </div>
+                        <div class="col-6">
+                            <div class="h4 text-info">&lt; 50</div>
+                            <small class="text-muted">MSE</small>
+                        </div>
+                    </div>
+                    <hr>
+                    <div class="row text-center">
+                        <div class="col-6">
+                            <div class="h4 text-warning">&lt; 5</div>
+                            <small class="text-muted">MAE</small>
+                        </div>
+                        <div class="col-6">
+                            <div class="h4 text-primary">Fast</div>
+                            <small class="text-muted">Prediction</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quick Actions -->
+            <div class="card shadow">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">Quick Actions</h6>
+                </div>
+                <div class="card-body">
+                    <div class="d-grid gap-2">
+                        <a href="{% url 'energy_analysis:dashboard' %}" class="btn btn-primary">
+                            <i class="fas fa-tachometer-alt"></i> Dashboard
+                        </a>
+                        <a href="{% url 'energy_analysis:predict' %}" class="btn btn-info">
+                            <i class="fas fa-calculator"></i> Predict Usage
+                        </a>
+                        <a href="{% url 'energy_analysis:visualization' %}" class="btn btn-success">
+                            <i class="fas fa-chart-line"></i> View Charts
+                        </a>
+                        <a href="{% url 'energy_analysis:utility_monitor' %}" class="btn btn-warning">
+                            <i class="fas fa-tachometer-alt"></i> Utility Monitor
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Add training progress animation
+document.querySelector('form').addEventListener('submit', function() {
+    const progressBar = document.querySelector('.progress');
+    const progressBarInner = document.querySelector('.progress-bar');
+    const statusText = document.querySelector('.card-body p');
+    const statusIcon = document.querySelector('.card-body i');
+    
+    progressBar.style.display = 'block';
+    statusText.textContent = 'Training in progress...';
+    statusIcon.className = 'fas fa-spinner fa-spin fa-3x text-primary';
+    
+    let progress = 0;
+    const interval = setInterval(() => {
+        progress += Math.random() * 15;
+        if (progress > 100) progress = 100;
+        progressBarInner.style.width = progress + '%';
+        
+        if (progress === 100) {
+            clearInterval(interval);
+            setTimeout(() => {
+                statusText.textContent = 'Training completed!';
+                statusIcon.className = 'fas fa-check-circle fa-3x text-success';
+            }, 500);
+        }
+    }, 200);
+});
+</script>
+{% endblock %} 
