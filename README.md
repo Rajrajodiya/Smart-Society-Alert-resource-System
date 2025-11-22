@@ -3,6 +3,9 @@
 ![SSARS Logo](ssars/ssars/static/images/SSARS.png)
 
 A comprehensive Django-based web application for smart home energy management, weather monitoring, news aggregation, and intelligent resource optimization with advanced machine learning capabilities.
+I had given the link so you can read this notepad file first and follow that step so your project will be run perfecttlly 
+LINK : https://drive.google.com/drive/folders/1agkLAH_Htn63KHcDIxE_xmvIeddt2KZk?usp=sharing
+for more inquiry : 9979710905
 
 ## 📋 Table of Contents
 - [Overview](#overview)
